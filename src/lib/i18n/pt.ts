@@ -138,6 +138,23 @@ export const pt: Translations = {
 		userSaved: "Guardado",
 		comingSoon:
 			"A gest\u00e3o de recursos estar\u00e1 dispon\u00edvel numa futura atualiza\u00e7\u00e3o.",
+		empty: "Sem recursos",
+		emptyDescription:
+			"Carregue um PUC para extrair a bibliografia ou adicione os seus pr\u00f3prios recursos.",
+		created: "Recurso adicionado",
+		updated: "Recurso atualizado",
+		deleted: "Recurso eliminado",
+		pinned: "Recurso fixado",
+		unpinned: "Recurso desafixado",
+		deleteConfirm: "Tem a certeza que quer eliminar este recurso?",
+		titleLabel: "T\u00edtulo",
+		titlePlaceholder: "ex: C\u00e1lculo Vol. 1",
+		urlLabel: "URL",
+		urlPlaceholder: "https://...",
+		notesLabel: "Notas",
+		notesPlaceholder: "Notas adicionais...",
+		tagsLabel: "Etiquetas",
+		tagsPlaceholder: "Adicione etiquetas separadas por v\u00edrgula",
 	},
 	brief: {
 		title: "Resumo da Disciplina",

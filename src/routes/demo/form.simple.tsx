@@ -26,7 +26,7 @@ function SimpleForm() {
 			// Show success message
 			alert("Form submitted successfully!");
 		},
-	})
+	});
 
 	return (
 		<div
@@ -61,5 +61,5 @@ function SimpleForm() {
 				</form>
 			</div>
 		</div>
-	)
+	);
 }
