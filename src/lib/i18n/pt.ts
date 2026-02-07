@@ -179,6 +179,8 @@ export const pt: Translations = {
 		pinnedResources: "Recursos Fixados",
 		noUpcoming: "Sem prazos pr\u00f3ximos",
 		nothingThisWeek: "Nada agendado esta semana",
+		allConfirmed: "Todos os eventos confirmados",
+		noPinned: "Sem recursos fixados",
 		empty: {
 			title: "Come\u00e7ar",
 			description:

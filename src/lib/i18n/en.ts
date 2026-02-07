@@ -174,6 +174,8 @@ export const en = {
 		pinnedResources: "Pinned Resources",
 		noUpcoming: "No upcoming deadlines",
 		nothingThisWeek: "Nothing scheduled this week",
+		allConfirmed: "All events confirmed",
+		noPinned: "No pinned resources",
 		empty: {
 			title: "Get started",
 			description:
