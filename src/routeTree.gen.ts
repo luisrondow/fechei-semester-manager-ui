@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SemestersRouteImport } from './routes/semesters'
 import { Route as PucExplainerRouteImport } from './routes/puc-explainer'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SemestersNewRouteImport } from './routes/semesters.new'
 import { Route as SemesterSemesterIdRouteImport } from './routes/semester.$semesterId'
@@ -51,6 +52,11 @@ const SemestersRoute = SemestersRouteImport.update({
 const PucExplainerRoute = PucExplainerRouteImport.update({
   id: '/puc-explainer',
   path: '/puc-explainer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -188,6 +194,7 @@ const SemesterSemesterIdSubjectSubjectIdBriefRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/puc-explainer': typeof PucExplainerRoute
   '/semesters': typeof SemestersRouteWithChildren
   '/settings': typeof SettingsRoute
@@ -218,6 +225,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/puc-explainer': typeof PucExplainerRoute
   '/semesters': typeof SemestersRouteWithChildren
   '/settings': typeof SettingsRoute
@@ -247,6 +255,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/puc-explainer': typeof PucExplainerRoute
   '/semesters': typeof SemestersRouteWithChildren
   '/settings': typeof SettingsRoute
@@ -279,6 +288,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/puc-explainer'
     | '/semesters'
     | '/settings'
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dashboard'
     | '/puc-explainer'
     | '/semesters'
     | '/settings'
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/dashboard'
     | '/puc-explainer'
     | '/semesters'
     | '/settings'
@@ -368,6 +380,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
   PucExplainerRoute: typeof PucExplainerRoute
   SemestersRoute: typeof SemestersRouteWithChildren
   SettingsRoute: typeof SettingsRoute
@@ -408,6 +421,13 @@ declare module '@tanstack/react-router' {
       path: '/puc-explainer'
       fullPath: '/puc-explainer'
       preLoaderRoute: typeof PucExplainerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -646,6 +666,7 @@ const SemesterSemesterIdRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
   PucExplainerRoute: PucExplainerRoute,
   SemestersRoute: SemestersRouteWithChildren,
   SettingsRoute: SettingsRoute,

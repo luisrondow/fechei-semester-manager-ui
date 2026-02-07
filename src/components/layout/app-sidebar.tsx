@@ -2,6 +2,7 @@ import { Link, useMatches } from "@tanstack/react-router";
 import {
 	BookOpen,
 	GraduationCap,
+	LayoutDashboard,
 	PanelLeftClose,
 	PanelLeftOpen,
 	Settings,
@@ -29,6 +30,12 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 
 	const navItems = [
 		{
+			to: "/dashboard" as const,
+			label: t.nav.dashboard,
+			icon: LayoutDashboard,
+			match: (path: string) => path === "/dashboard",
+		},
+		{
 			to: "/semesters" as const,
 			label: t.nav.semesters,
 			icon: GraduationCap,
@@ -46,7 +53,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 			>
 				{/* Logo */}
 				<div className="flex items-center h-16 px-4 border-b border-sidebar-border">
-					<Link to="/semesters" className="flex items-center gap-3 min-w-0">
+					<Link to="/dashboard" className="flex items-center gap-3 min-w-0">
 						<div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
 							<BookOpen className="w-4 h-4 text-sidebar-primary-foreground" />
 						</div>
