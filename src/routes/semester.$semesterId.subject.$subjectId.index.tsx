@@ -28,6 +28,7 @@ import { updatePUCStatus } from "@/data/mock/store";
 import { useBrief } from "@/hooks/queries/use-briefs";
 import { useEventsBySubject } from "@/hooks/queries/use-events";
 import { usePUC } from "@/hooks/queries/use-puc";
+import { useResourcesBySubject } from "@/hooks/queries/use-resources";
 import { useDeleteSubject, useSubject } from "@/hooks/queries/use-subjects";
 import { uploadPUC } from "@/lib/api/puc";
 import { useI18n } from "@/lib/i18n";
@@ -47,11 +48,11 @@ function SubjectOverviewPage() {
 	const { data: puc, refetch: refetchPuc } = usePUC(subjectId);
 	const { data: events = [] } = useEventsBySubject(subjectId);
 	const { data: brief } = useBrief(subjectId);
+	const { data: resourcesList = [] } = useResourcesBySubject(subjectId);
 	const deleteSubject = useDeleteSubject(semesterId);
 
 	const assessments = events.filter((e) => e.type === "assessment");
 	const studyBlocks = events.filter((e) => e.type === "study_block");
-	const resources = 0; // Will be wired up in Phase 4
 
 	// PUC upload simulation
 	const [uploadingStatus, setUploadingStatus] =
@@ -130,7 +131,7 @@ function SubjectOverviewPage() {
 					},
 					{
 						label: t.resource.title,
-						value: String(resources),
+						value: String(resourcesList.length),
 						icon: FileText,
 					},
 					{
