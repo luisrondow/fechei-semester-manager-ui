@@ -57,23 +57,55 @@ export const en = {
 	subject: {
 		title: "Subjects",
 		add: "Add Subject",
+		created: "Subject created",
+		deleted: "Subject deleted",
+		delete: "Delete Subject",
+		deleteConfirm:
+			"Are you sure you want to delete this subject? All associated data will be lost.",
 		name: "Subject name",
+		namePlaceholder: "e.g. Álgebra Linear I",
 		code: "Course code",
+		codePlaceholder: "e.g. 21092",
 		instructor: "Instructor",
+		instructorPlaceholder: "e.g. Prof. Maria Santos",
 		pucStatus: "PUC status",
 		brief: "Subject Brief",
 		review: "Review",
 		resources: "Resources",
 		overview: "Overview",
 		uploadPuc: "Upload PUC",
+		upcomingEvents: "Upcoming Events",
 	},
 	puc: {
 		upload: "Upload PUC",
+		uploading: "Uploading...",
 		dropzone: "Drop your PUC PDF here or click to browse",
 		processing: "Processing PUC...",
 		extracted: "Extraction complete",
 		error: "Extraction failed",
+		errorRetry: "Please try uploading again.",
 		whatsThis: "What is the PUC?",
+		noDocument: "No PUC uploaded yet",
+		noExtraction: "No extraction data",
+		uploadFirst: "Upload a PUC document first to see extracted events.",
+		uploadHint:
+			"Upload the PUC (Plano da Unidade Curricular) PDF to extract your semester calendar and resources.",
+		explainerDescription:
+			"The PUC (Plano da Unidade Curricular) is the official course unit plan provided by your university. It contains assessment dates, study schedules, bibliography, and learning objectives.",
+		explainerFormat: "Accepted format: PDF",
+		howItWorks: "How it works",
+		stepUpload: "Upload your PUC",
+		stepUploadDesc:
+			"Upload the PDF document provided by your university for each course unit.",
+		stepExtract: "Automatic extraction",
+		stepExtractDesc:
+			"Our AI reads the document and extracts dates, assessments, study blocks, and bibliography.",
+		stepCalendar: "Review your calendar",
+		stepCalendarDesc:
+			"Review the extracted events, confirm dates, and make any adjustments needed.",
+		stepBrief: "Get your subject brief",
+		stepBriefDesc:
+			"Receive an AI-generated summary of what you'll study, competencies to develop, and a study roadmap.",
 	},
 	calendar: {
 		title: "Calendar",
@@ -101,6 +133,7 @@ export const en = {
 		other: "Other",
 		pucExtracted: "From PUC",
 		userSaved: "Saved",
+		comingSoon: "Resources management will be available in a future update.",
 	},
 	brief: {
 		title: "Subject Brief",
@@ -108,6 +141,7 @@ export const en = {
 		edited: "Edited",
 		reset: "Reset to generated",
 		edit: "Edit brief",
+		comingSoon: "Subject brief will be available in a future update.",
 	},
 	dashboard: {
 		title: "Dashboard",
