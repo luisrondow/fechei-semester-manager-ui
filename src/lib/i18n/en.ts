@@ -140,8 +140,13 @@ export const en = {
 		generated: "AI Generated",
 		edited: "Edited",
 		reset: "Reset to generated",
+		resetDone: "Brief reset to generated version",
 		edit: "Edit brief",
+		saved: "Brief saved",
 		comingSoon: "Subject brief will be available in a future update.",
+		noBrief: "No brief available",
+		noBriefDescription:
+			"Upload and process a PUC document to generate the subject brief.",
 	},
 	dashboard: {
 		title: "Dashboard",

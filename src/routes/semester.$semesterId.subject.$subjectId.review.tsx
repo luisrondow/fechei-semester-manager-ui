@@ -7,18 +7,17 @@ import {
 	Clock,
 	HelpCircle,
 } from "lucide-react";
-import { useCallback } from "react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/layout/empty-state";
+import { StatusChip } from "@/components/status-chip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-	confirmEvent as confirmEventInStore,
-	getEventsBySubject,
-	getPUCBySubject,
-} from "@/data/mock/store";
-import { useSubject } from "@/hooks/queries/use-subjects";
+	useConfirmEvent,
+	useEventsBySubject,
+} from "@/hooks/queries/use-events";
+import { usePUC } from "@/hooks/queries/use-puc";
 import { useI18n } from "@/lib/i18n";
 import type { CalendarEvent } from "@/lib/types";
 
@@ -29,17 +28,17 @@ export const Route = createFileRoute(
 });
 
 function ReviewPage() {
-	const { subjectId } = Route.useParams();
+	const { semesterId, subjectId } = Route.useParams();
 	const { t } = useI18n();
-	const { data: subject, isLoading } = useSubject(subjectId);
 
-	const puc = subject ? getPUCBySubject(subject.id) : undefined;
-	const events = subject ? getEventsBySubject(subject.id) : [];
+	const { data: puc, isLoading: pucLoading } = usePUC(subjectId);
+	const { data: events = [], isLoading: evtLoading } =
+		useEventsBySubject(subjectId);
 
 	const confirmedCount = events.filter((e) => e.status === "confirmed").length;
 	const pendingCount = events.filter((e) => e.status === "pending").length;
 
-	if (isLoading) {
+	if (pucLoading || evtLoading) {
 		return (
 			<div className="space-y-4">
 				{[1, 2, 3].map((i) => (
@@ -84,22 +83,35 @@ function ReviewPage() {
 			{/* Events list */}
 			<div className="space-y-3">
 				{events.map((event) => (
-					<EventReviewCard key={event.id} event={event} />
+					<EventReviewCard
+						key={event.id}
+						event={event}
+						subjectId={subjectId}
+						semesterId={semesterId}
+					/>
 				))}
 			</div>
 		</div>
 	);
 }
 
-function EventReviewCard({ event }: { event: CalendarEvent }) {
+function EventReviewCard({
+	event,
+	subjectId,
+	semesterId,
+}: {
+	event: CalendarEvent;
+	subjectId: string;
+	semesterId: string;
+}) {
 	const { t } = useI18n();
+	const confirmEvent = useConfirmEvent(subjectId, semesterId);
 
-	const handleConfirm = useCallback(() => {
-		confirmEventInStore(event.id);
-		toast.success(t.event.confirmed);
-		// Force re-render by using the store directly
-		window.dispatchEvent(new Event("store-update"));
-	}, [event.id, t.event.confirmed]);
+	const handleConfirm = () => {
+		confirmEvent.mutate(event.id, {
+			onSuccess: () => toast.success(t.event.confirmed),
+		});
+	};
 
 	const typeConfig = {
 		study_block: {
@@ -151,22 +163,7 @@ function EventReviewCard({ event }: { event: CalendarEvent }) {
 							>
 								{cfg.label}
 							</Badge>
-							{event.status === "confirmed" ? (
-								<Badge
-									variant="outline"
-									className="bg-success/15 text-success border-success/25 text-[10px]"
-								>
-									<Check className="w-3 h-3 mr-0.5" />
-									{t.event.confirmed}
-								</Badge>
-							) : (
-								<Badge
-									variant="outline"
-									className="bg-warning/15 text-warning border-warning/25 text-[10px]"
-								>
-									{t.event.pending}
-								</Badge>
-							)}
+							<StatusChip status={event.status} />
 						</div>
 
 						<h4 className="font-medium text-sm mb-1">{event.title}</h4>

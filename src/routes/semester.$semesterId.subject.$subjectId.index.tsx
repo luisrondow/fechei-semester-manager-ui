@@ -24,12 +24,9 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	getBriefBySubject,
-	getEventsBySubject,
-	getResourcesBySubject,
-	updatePUCStatus,
-} from "@/data/mock/store";
+import { updatePUCStatus } from "@/data/mock/store";
+import { useBrief } from "@/hooks/queries/use-briefs";
+import { useEventsBySubject } from "@/hooks/queries/use-events";
 import { usePUC } from "@/hooks/queries/use-puc";
 import { useDeleteSubject, useSubject } from "@/hooks/queries/use-subjects";
 import { uploadPUC } from "@/lib/api/puc";
@@ -48,14 +45,13 @@ function SubjectOverviewPage() {
 	const navigate = useNavigate();
 	const { data: subject, isLoading } = useSubject(subjectId);
 	const { data: puc, refetch: refetchPuc } = usePUC(subjectId);
+	const { data: events = [] } = useEventsBySubject(subjectId);
+	const { data: brief } = useBrief(subjectId);
 	const deleteSubject = useDeleteSubject(semesterId);
-
-	const events = subject ? getEventsBySubject(subject.id) : [];
-	const resources = subject ? getResourcesBySubject(subject.id) : [];
-	const brief = subject ? getBriefBySubject(subject.id) : null;
 
 	const assessments = events.filter((e) => e.type === "assessment");
 	const studyBlocks = events.filter((e) => e.type === "study_block");
+	const resources = 0; // Will be wired up in Phase 4
 
 	// PUC upload simulation
 	const [uploadingStatus, setUploadingStatus] =
@@ -67,7 +63,6 @@ function SubjectOverviewPage() {
 			setUploadingStatus("uploading");
 			const doc = await uploadPUC(subjectId, file.name);
 
-			// Simulate processing pipeline
 			setTimeout(() => {
 				setUploadingStatus("processing");
 				updatePUCStatus(doc.id, "processing");
@@ -135,7 +130,7 @@ function SubjectOverviewPage() {
 					},
 					{
 						label: t.resource.title,
-						value: String(resources.length),
+						value: String(resources),
 						icon: FileText,
 					},
 					{

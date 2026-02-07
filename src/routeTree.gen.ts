@@ -19,6 +19,7 @@ import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-qu
 import { Route as DemoBetterAuthRouteImport } from './routes/demo/better-auth'
 import { Route as SemesterSemesterIdIndexRouteImport } from './routes/semester.$semesterId.index'
 import { Route as SemesterSemesterIdEditRouteImport } from './routes/semester.$semesterId.edit'
+import { Route as SemesterSemesterIdCalendarRouteImport } from './routes/semester.$semesterId.calendar'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
@@ -87,6 +88,12 @@ const SemesterSemesterIdEditRoute = SemesterSemesterIdEditRouteImport.update({
   path: '/edit',
   getParentRoute: () => SemesterSemesterIdRoute,
 } as any)
+const SemesterSemesterIdCalendarRoute =
+  SemesterSemesterIdCalendarRouteImport.update({
+    id: '/calendar',
+    path: '/calendar',
+    getParentRoute: () => SemesterSemesterIdRoute,
+  } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
   id: '/demo/start/server-funcs',
   path: '/demo/start/server-funcs',
@@ -195,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/semester/$semesterId/calendar': typeof SemesterSemesterIdCalendarRoute
   '/semester/$semesterId/edit': typeof SemesterSemesterIdEditRoute
   '/semester/$semesterId/': typeof SemesterSemesterIdIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
@@ -223,6 +231,7 @@ export interface FileRoutesByTo {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/semester/$semesterId/calendar': typeof SemesterSemesterIdCalendarRoute
   '/semester/$semesterId/edit': typeof SemesterSemesterIdEditRoute
   '/semester/$semesterId': typeof SemesterSemesterIdIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
@@ -252,6 +261,7 @@ export interface FileRoutesById {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/semester/$semesterId/calendar': typeof SemesterSemesterIdCalendarRoute
   '/semester/$semesterId/edit': typeof SemesterSemesterIdEditRoute
   '/semester/$semesterId/': typeof SemesterSemesterIdIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/semester/$semesterId/calendar'
     | '/semester/$semesterId/edit'
     | '/semester/$semesterId/'
     | '/demo/start/ssr/data-only'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/semester/$semesterId/calendar'
     | '/semester/$semesterId/edit'
     | '/semester/$semesterId'
     | '/demo/start/ssr/data-only'
@@ -339,6 +351,7 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/semester/$semesterId/calendar'
     | '/semester/$semesterId/edit'
     | '/semester/$semesterId/'
     | '/demo/start/ssr/data-only'
@@ -444,6 +457,13 @@ declare module '@tanstack/react-router' {
       path: '/edit'
       fullPath: '/semester/$semesterId/edit'
       preLoaderRoute: typeof SemesterSemesterIdEditRouteImport
+      parentRoute: typeof SemesterSemesterIdRoute
+    }
+    '/semester/$semesterId/calendar': {
+      id: '/semester/$semesterId/calendar'
+      path: '/calendar'
+      fullPath: '/semester/$semesterId/calendar'
+      preLoaderRoute: typeof SemesterSemesterIdCalendarRouteImport
       parentRoute: typeof SemesterSemesterIdRoute
     }
     '/demo/start/server-funcs': {
@@ -605,6 +625,7 @@ const SemesterSemesterIdSubjectSubjectIdRouteWithChildren =
   )
 
 interface SemesterSemesterIdRouteChildren {
+  SemesterSemesterIdCalendarRoute: typeof SemesterSemesterIdCalendarRoute
   SemesterSemesterIdEditRoute: typeof SemesterSemesterIdEditRoute
   SemesterSemesterIdIndexRoute: typeof SemesterSemesterIdIndexRoute
   SemesterSemesterIdSubjectSubjectIdRoute: typeof SemesterSemesterIdSubjectSubjectIdRouteWithChildren
@@ -612,6 +633,7 @@ interface SemesterSemesterIdRouteChildren {
 }
 
 const SemesterSemesterIdRouteChildren: SemesterSemesterIdRouteChildren = {
+  SemesterSemesterIdCalendarRoute: SemesterSemesterIdCalendarRoute,
   SemesterSemesterIdEditRoute: SemesterSemesterIdEditRoute,
   SemesterSemesterIdIndexRoute: SemesterSemesterIdIndexRoute,
   SemesterSemesterIdSubjectSubjectIdRoute:

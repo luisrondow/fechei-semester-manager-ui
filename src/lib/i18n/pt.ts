@@ -144,9 +144,14 @@ export const pt: Translations = {
 		generated: "Gerado por IA",
 		edited: "Editado",
 		reset: "Repor vers\u00e3o gerada",
+		resetDone: "Resumo reposto para a vers\u00e3o gerada",
 		edit: "Editar resumo",
+		saved: "Resumo guardado",
 		comingSoon:
 			"O resumo da disciplina estar\u00e1 dispon\u00edvel numa futura atualiza\u00e7\u00e3o.",
+		noBrief: "Sem resumo dispon\u00edvel",
+		noBriefDescription:
+			"Carregue e processe um documento PUC para gerar o resumo da disciplina.",
 	},
 	dashboard: {
 		title: "Painel",
