@@ -32,8 +32,9 @@ pnpm dlx shadcn@latest add <component>
 - **Auth**: Better Auth (email/password, configured for TanStack Start cookies)
 - **Styling**: Tailwind CSS v4 + Shadcn UI (new-york style) with warm parchment/terracotta theme
 - **Fonts**: DM Serif Text (headings) + DM Sans (body)
-- **i18n**: Custom lightweight system (2 locales: EN/PT-PT, ~200 keys, full type safety)
+- **i18n**: Custom lightweight system (2 locales: EN/PT-PT, ~300 keys, full type safety)
 - **Deployment**: Cloudflare Workers via Wrangler
+- **Calendar Export**: Client-side RFC 5545 .ics generation (full or due-dates-only)
 
 ### Key Directories
 - `src/routes/` - File-based routing (TanStack Router auto-generates `routeTree.gen.ts`)
@@ -41,12 +42,13 @@ pnpm dlx shadcn@latest add <component>
 - `src/components/ui/` - Shadcn UI components
 - `src/components/layout/` - App shell, sidebar, page header, empty state
 - `src/components/forms/` - App form hook, context, field components (TextField, TextArea, Select, DateField)
+- `src/components/` - Feature components (semester-card, subject-card, event-card, resource-item, brief-editor, puc-upload, locale-switcher, etc.)
 - `src/integrations/` - Third-party integration wrappers (tanstack-query, better-auth)
 - `src/lib/` - Utilities, auth, types, i18n, API functions
 - `src/lib/i18n/` - i18n provider, translations (en.ts, pt.ts)
 - `src/lib/api/` - Async API functions (mock now, HTTP later) — **only layer that changes when swapping backend**
 - `src/hooks/queries/` - TanStack Query hooks (useQuery/useMutation wrappers)
-- `src/data/mock/` - In-memory CRUD store with realistic seed data
+- `src/data/mock/` - In-memory CRUD store with realistic seed data (2 subjects, ~10 events each, resources, briefs)
 
 ### Data Architecture (Three-layer pattern)
 ```
@@ -61,11 +63,31 @@ All core entities in `src/lib/types.ts`: Semester, Subject, PUCDocument, Subject
 ### Routing Patterns
 - Routes in `src/routes/` map to URLs (e.g., `index.tsx` → `/`, `semesters.tsx` → `/semesters`)
 - Root layout at `src/routes/__root.tsx` wraps all pages with I18nProvider and AppShell
-- `index.tsx` redirects to `/semesters`
+- `index.tsx` redirects to `/dashboard`
 - Semester detail uses layout route: `semester.$semesterId.tsx` → `semester.$semesterId.index.tsx`
-- Subject detail uses nested layout: `semester.$semesterId.subject.$subjectId.tsx`
+- Subject detail uses nested layout: `semester.$semesterId.subject.$subjectId.tsx` (tabbed: overview, review, brief, resources)
 - API routes use `.ts` extension with handler exports
 - Route context includes `queryClient` from TanStack Query
+- Each page wraps its own content with `max-w-Nxl mx-auto px-6 py-10` (AppShell provides no content padding)
+
+### Route Map
+```
+/                                                → Redirect to /dashboard
+/dashboard                                       → Aggregated overview (deadlines, this week, pinned)
+/semesters                                       → Semester list
+/semesters/new                                   → Create semester form
+/semester/:id                                    → Semester detail (subjects grid, stats)
+/semester/:id/edit                               → Edit semester form
+/semester/:id/calendar                           → Month calendar view
+/semester/:id/export                             → .ics export (full / due-dates-only)
+/semester/:id/subjects/new                       → Add subject + PUC upload
+/semester/:id/subject/:subId                     → Subject overview (tabbed layout)
+/semester/:id/subject/:subId/review              → Review PUC extraction
+/semester/:id/subject/:subId/brief               → AI subject brief (view/edit)
+/semester/:id/subject/:subId/resources            → Resources (CRUD, pin/sort)
+/puc-explainer                                   → "What is the PUC?" info page
+/settings                                        → Language + timezone
+```
 
 ### i18n Pattern
 ```tsx
@@ -74,8 +96,27 @@ const { t } = useI18n()
 ```
 Locale stored in localStorage, detected from browser language on first visit. `<html lang>` driven by current locale.
 
+### API Layer (`src/lib/api/`)
+| File | Purpose |
+|------|---------|
+| `semesters.ts` | Semester CRUD |
+| `subjects.ts` | Subject CRUD by semester |
+| `puc.ts` | PUC upload + extraction status polling |
+| `events.ts` | Calendar events CRUD + confirm |
+| `briefs.ts` | Subject brief fetch + update |
+| `resources.ts` | Resource CRUD + pin toggle |
+| `calendar-export.ts` | Client-side .ics generation + download |
+
 ### Code Style
 - Biome for linting/formatting (tabs, double quotes)
 - Path alias: `@/*` → `./src/*`
 - React Compiler enabled via Babel plugin
 - TypeScript strict mode enabled
+
+### Implementation Status
+All MVP features are implemented (Phases 0-6 complete):
+- Semester CRUD, Subject management, PUC upload/extraction
+- Calendar events (view/edit/confirm), month calendar view
+- Subject briefs (AI-generated, editable), Resources (CRUD, pin/sort)
+- Dashboard with aggregated data, .ics export, Settings, full EN/PT-PT i18n
+- Demo files cleaned up

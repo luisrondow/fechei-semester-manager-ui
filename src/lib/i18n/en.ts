@@ -186,7 +186,11 @@ export const en = {
 	settings: {
 		title: "Settings",
 		language: "Language",
+		languageDescription:
+			"Choose the language for the interface. Changes apply immediately.",
 		timezone: "Timezone",
+		timezoneDescription:
+			"Your timezone is detected automatically from your browser.",
 		english: "English",
 		portuguese: "Portugu\u00eas",
 	},
@@ -197,6 +201,9 @@ export const en = {
 		dueOnly: "Due dates only",
 		dueDescription: "Assessments and deadlines only",
 		download: "Download .ics",
+		downloaded: "Calendar exported successfully",
+		importHint:
+			"Import the .ics file into Google Calendar, Apple Calendar, or any calendar app that supports iCalendar format.",
 	},
 } as const;
 
