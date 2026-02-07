@@ -191,7 +191,11 @@ export const pt: Translations = {
 	settings: {
 		title: "Defini\u00e7\u00f5es",
 		language: "Idioma",
+		languageDescription:
+			"Escolha o idioma da interface. As altera\u00e7\u00f5es s\u00e3o aplicadas imediatamente.",
 		timezone: "Fuso hor\u00e1rio",
+		timezoneDescription:
+			"O seu fuso hor\u00e1rio \u00e9 detetado automaticamente a partir do seu navegador.",
 		english: "English",
 		portuguese: "Portugu\u00eas",
 	},
@@ -202,5 +206,8 @@ export const pt: Translations = {
 		dueOnly: "Apenas prazos",
 		dueDescription: "Avalia\u00e7\u00f5es e prazos apenas",
 		download: "Transferir .ics",
+		downloaded: "Calend\u00e1rio exportado com sucesso",
+		importHint:
+			"Importe o ficheiro .ics para o Google Calendar, Apple Calendar ou qualquer aplica\u00e7\u00e3o que suporte o formato iCalendar.",
 	},
 } as const;

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	CalendarDays,
+	Download,
 	GraduationCap,
 	MoreHorizontal,
 	Pencil,
@@ -112,6 +113,15 @@ function SemesterDetailPage() {
 							>
 								<CalendarDays className="w-3.5 h-3.5 mr-1.5" />
 								{t.semester.calendar}
+							</Link>
+						</Button>
+						<Button variant="outline" size="sm" asChild>
+							<Link
+								to="/semester/$semesterId/export"
+								params={{ semesterId: semester.id }}
+							>
+								<Download className="w-3.5 h-3.5 mr-1.5" />
+								{t.semester.export}
 							</Link>
 						</Button>
 						<Button variant="outline" size="sm" asChild>

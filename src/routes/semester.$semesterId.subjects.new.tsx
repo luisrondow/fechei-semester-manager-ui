@@ -123,7 +123,7 @@ function NewSubjectPage() {
 
 				<div className="flex gap-3 pt-4">
 					<form.AppForm>
-						{(form) => <form.SubscribeButton label={t.subject.add} />}
+						<form.SubscribeButton label={t.subject.add} />
 					</form.AppForm>
 					<Button type="button" variant="outline" asChild>
 						<Link to="/semester/$semesterId" params={{ semesterId }}>
