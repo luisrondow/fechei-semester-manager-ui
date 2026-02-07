@@ -59,23 +59,56 @@ export const pt: Translations = {
 	subject: {
 		title: "Disciplinas",
 		add: "Adicionar Disciplina",
+		created: "Disciplina criada",
+		deleted: "Disciplina eliminada",
+		delete: "Eliminar Disciplina",
+		deleteConfirm:
+			"Tem a certeza que quer eliminar esta disciplina? Todos os dados associados ser\u00e3o perdidos.",
 		name: "Nome da disciplina",
+		namePlaceholder: "ex: \u00c1lgebra Linear I",
 		code: "C\u00f3digo do curso",
+		codePlaceholder: "ex: 21092",
 		instructor: "Docente",
+		instructorPlaceholder: "ex: Prof. Maria Santos",
 		pucStatus: "Estado do PUC",
 		brief: "Resumo da Disciplina",
 		review: "Revis\u00e3o",
 		resources: "Recursos",
 		overview: "Vis\u00e3o Geral",
 		uploadPuc: "Carregar PUC",
+		upcomingEvents: "Pr\u00f3ximos Eventos",
 	},
 	puc: {
 		upload: "Carregar PUC",
+		uploading: "A carregar...",
 		dropzone: "Arraste o PDF do PUC aqui ou clique para procurar",
 		processing: "A processar PUC...",
 		extracted: "Extra\u00e7\u00e3o conclu\u00edda",
 		error: "Extra\u00e7\u00e3o falhou",
+		errorRetry: "Por favor, tente carregar novamente.",
 		whatsThis: "O que \u00e9 o PUC?",
+		noDocument: "Nenhum PUC carregado",
+		noExtraction: "Sem dados de extra\u00e7\u00e3o",
+		uploadFirst:
+			"Carregue um documento PUC primeiro para ver os eventos extra\u00eddos.",
+		uploadHint:
+			"Carregue o PDF do PUC (Plano da Unidade Curricular) para extrair o calend\u00e1rio do semestre e os recursos.",
+		explainerDescription:
+			"O PUC (Plano da Unidade Curricular) \u00e9 o plano oficial da unidade curricular fornecido pela sua universidade. Cont\u00e9m datas de avalia\u00e7\u00e3o, calend\u00e1rios de estudo, bibliografia e objetivos de aprendizagem.",
+		explainerFormat: "Formato aceite: PDF",
+		howItWorks: "Como funciona",
+		stepUpload: "Carregue o seu PUC",
+		stepUploadDesc:
+			"Carregue o documento PDF fornecido pela sua universidade para cada unidade curricular.",
+		stepExtract: "Extra\u00e7\u00e3o autom\u00e1tica",
+		stepExtractDesc:
+			"A nossa IA l\u00ea o documento e extrai datas, avalia\u00e7\u00f5es, blocos de estudo e bibliografia.",
+		stepCalendar: "Reveja o seu calend\u00e1rio",
+		stepCalendarDesc:
+			"Reveja os eventos extra\u00eddos, confirme datas e fa\u00e7a os ajustes necess\u00e1rios.",
+		stepBrief: "Obtenha o resumo da disciplina",
+		stepBriefDesc:
+			"Receba um resumo gerado por IA sobre o que vai estudar, compet\u00eancias a desenvolver e um roteiro de estudo.",
 	},
 	calendar: {
 		title: "Calend\u00e1rio",
@@ -103,13 +136,22 @@ export const pt: Translations = {
 		other: "Outro",
 		pucExtracted: "Do PUC",
 		userSaved: "Guardado",
+		comingSoon:
+			"A gest\u00e3o de recursos estar\u00e1 dispon\u00edvel numa futura atualiza\u00e7\u00e3o.",
 	},
 	brief: {
 		title: "Resumo da Disciplina",
 		generated: "Gerado por IA",
 		edited: "Editado",
 		reset: "Repor vers\u00e3o gerada",
+		resetDone: "Resumo reposto para a vers\u00e3o gerada",
 		edit: "Editar resumo",
+		saved: "Resumo guardado",
+		comingSoon:
+			"O resumo da disciplina estar\u00e1 dispon\u00edvel numa futura atualiza\u00e7\u00e3o.",
+		noBrief: "Sem resumo dispon\u00edvel",
+		noBriefDescription:
+			"Carregue e processe um documento PUC para gerar o resumo da disciplina.",
 	},
 	dashboard: {
 		title: "Painel",

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SemestersRouteImport } from './routes/semesters'
+import { Route as PucExplainerRouteImport } from './routes/puc-explainer'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SemestersNewRouteImport } from './routes/semesters.new'
 import { Route as SemesterSemesterIdRouteImport } from './routes/semester.$semesterId'
@@ -18,6 +19,7 @@ import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-qu
 import { Route as DemoBetterAuthRouteImport } from './routes/demo/better-auth'
 import { Route as SemesterSemesterIdIndexRouteImport } from './routes/semester.$semesterId.index'
 import { Route as SemesterSemesterIdEditRouteImport } from './routes/semester.$semesterId.edit'
+import { Route as SemesterSemesterIdCalendarRouteImport } from './routes/semester.$semesterId.calendar'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
@@ -32,6 +34,9 @@ import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 import { Route as SemesterSemesterIdSubjectSubjectIdIndexRouteImport } from './routes/semester.$semesterId.subject.$subjectId.index'
+import { Route as SemesterSemesterIdSubjectSubjectIdReviewRouteImport } from './routes/semester.$semesterId.subject.$subjectId.review'
+import { Route as SemesterSemesterIdSubjectSubjectIdResourcesRouteImport } from './routes/semester.$semesterId.subject.$subjectId.resources'
+import { Route as SemesterSemesterIdSubjectSubjectIdBriefRouteImport } from './routes/semester.$semesterId.subject.$subjectId.brief'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -41,6 +46,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const SemestersRoute = SemestersRouteImport.update({
   id: '/semesters',
   path: '/semesters',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PucExplainerRoute = PucExplainerRouteImport.update({
+  id: '/puc-explainer',
+  path: '/puc-explainer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -78,6 +88,12 @@ const SemesterSemesterIdEditRoute = SemesterSemesterIdEditRouteImport.update({
   path: '/edit',
   getParentRoute: () => SemesterSemesterIdRoute,
 } as any)
+const SemesterSemesterIdCalendarRoute =
+  SemesterSemesterIdCalendarRouteImport.update({
+    id: '/calendar',
+    path: '/calendar',
+    getParentRoute: () => SemesterSemesterIdRoute,
+  } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
   id: '/demo/start/server-funcs',
   path: '/demo/start/server-funcs',
@@ -151,9 +167,28 @@ const SemesterSemesterIdSubjectSubjectIdIndexRoute =
     path: '/',
     getParentRoute: () => SemesterSemesterIdSubjectSubjectIdRoute,
   } as any)
+const SemesterSemesterIdSubjectSubjectIdReviewRoute =
+  SemesterSemesterIdSubjectSubjectIdReviewRouteImport.update({
+    id: '/review',
+    path: '/review',
+    getParentRoute: () => SemesterSemesterIdSubjectSubjectIdRoute,
+  } as any)
+const SemesterSemesterIdSubjectSubjectIdResourcesRoute =
+  SemesterSemesterIdSubjectSubjectIdResourcesRouteImport.update({
+    id: '/resources',
+    path: '/resources',
+    getParentRoute: () => SemesterSemesterIdSubjectSubjectIdRoute,
+  } as any)
+const SemesterSemesterIdSubjectSubjectIdBriefRoute =
+  SemesterSemesterIdSubjectSubjectIdBriefRouteImport.update({
+    id: '/brief',
+    path: '/brief',
+    getParentRoute: () => SemesterSemesterIdSubjectSubjectIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/puc-explainer': typeof PucExplainerRoute
   '/semesters': typeof SemestersRouteWithChildren
   '/settings': typeof SettingsRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
@@ -167,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/semester/$semesterId/calendar': typeof SemesterSemesterIdCalendarRoute
   '/semester/$semesterId/edit': typeof SemesterSemesterIdEditRoute
   '/semester/$semesterId/': typeof SemesterSemesterIdIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
@@ -175,10 +211,14 @@ export interface FileRoutesByFullPath {
   '/semester/$semesterId/subject/$subjectId': typeof SemesterSemesterIdSubjectSubjectIdRouteWithChildren
   '/semester/$semesterId/subjects/new': typeof SemesterSemesterIdSubjectsNewRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
+  '/semester/$semesterId/subject/$subjectId/brief': typeof SemesterSemesterIdSubjectSubjectIdBriefRoute
+  '/semester/$semesterId/subject/$subjectId/resources': typeof SemesterSemesterIdSubjectSubjectIdResourcesRoute
+  '/semester/$semesterId/subject/$subjectId/review': typeof SemesterSemesterIdSubjectSubjectIdReviewRoute
   '/semester/$semesterId/subject/$subjectId/': typeof SemesterSemesterIdSubjectSubjectIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/puc-explainer': typeof PucExplainerRoute
   '/semesters': typeof SemestersRouteWithChildren
   '/settings': typeof SettingsRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
@@ -191,6 +231,7 @@ export interface FileRoutesByTo {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/semester/$semesterId/calendar': typeof SemesterSemesterIdCalendarRoute
   '/semester/$semesterId/edit': typeof SemesterSemesterIdEditRoute
   '/semester/$semesterId': typeof SemesterSemesterIdIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
@@ -198,11 +239,15 @@ export interface FileRoutesByTo {
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/semester/$semesterId/subjects/new': typeof SemesterSemesterIdSubjectsNewRoute
   '/demo/start/ssr': typeof DemoStartSsrIndexRoute
+  '/semester/$semesterId/subject/$subjectId/brief': typeof SemesterSemesterIdSubjectSubjectIdBriefRoute
+  '/semester/$semesterId/subject/$subjectId/resources': typeof SemesterSemesterIdSubjectSubjectIdResourcesRoute
+  '/semester/$semesterId/subject/$subjectId/review': typeof SemesterSemesterIdSubjectSubjectIdReviewRoute
   '/semester/$semesterId/subject/$subjectId': typeof SemesterSemesterIdSubjectSubjectIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/puc-explainer': typeof PucExplainerRoute
   '/semesters': typeof SemestersRouteWithChildren
   '/settings': typeof SettingsRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
@@ -216,6 +261,7 @@ export interface FileRoutesById {
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/semester/$semesterId/calendar': typeof SemesterSemesterIdCalendarRoute
   '/semester/$semesterId/edit': typeof SemesterSemesterIdEditRoute
   '/semester/$semesterId/': typeof SemesterSemesterIdIndexRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
@@ -224,12 +270,16 @@ export interface FileRoutesById {
   '/semester/$semesterId/subject/$subjectId': typeof SemesterSemesterIdSubjectSubjectIdRouteWithChildren
   '/semester/$semesterId/subjects/new': typeof SemesterSemesterIdSubjectsNewRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
+  '/semester/$semesterId/subject/$subjectId/brief': typeof SemesterSemesterIdSubjectSubjectIdBriefRoute
+  '/semester/$semesterId/subject/$subjectId/resources': typeof SemesterSemesterIdSubjectSubjectIdResourcesRoute
+  '/semester/$semesterId/subject/$subjectId/review': typeof SemesterSemesterIdSubjectSubjectIdReviewRoute
   '/semester/$semesterId/subject/$subjectId/': typeof SemesterSemesterIdSubjectSubjectIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/puc-explainer'
     | '/semesters'
     | '/settings'
     | '/demo/better-auth'
@@ -243,6 +293,7 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/semester/$semesterId/calendar'
     | '/semester/$semesterId/edit'
     | '/semester/$semesterId/'
     | '/demo/start/ssr/data-only'
@@ -251,10 +302,14 @@ export interface FileRouteTypes {
     | '/semester/$semesterId/subject/$subjectId'
     | '/semester/$semesterId/subjects/new'
     | '/demo/start/ssr/'
+    | '/semester/$semesterId/subject/$subjectId/brief'
+    | '/semester/$semesterId/subject/$subjectId/resources'
+    | '/semester/$semesterId/subject/$subjectId/review'
     | '/semester/$semesterId/subject/$subjectId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/puc-explainer'
     | '/semesters'
     | '/settings'
     | '/demo/better-auth'
@@ -267,6 +322,7 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/semester/$semesterId/calendar'
     | '/semester/$semesterId/edit'
     | '/semester/$semesterId'
     | '/demo/start/ssr/data-only'
@@ -274,10 +330,14 @@ export interface FileRouteTypes {
     | '/demo/start/ssr/spa-mode'
     | '/semester/$semesterId/subjects/new'
     | '/demo/start/ssr'
+    | '/semester/$semesterId/subject/$subjectId/brief'
+    | '/semester/$semesterId/subject/$subjectId/resources'
+    | '/semester/$semesterId/subject/$subjectId/review'
     | '/semester/$semesterId/subject/$subjectId'
   id:
     | '__root__'
     | '/'
+    | '/puc-explainer'
     | '/semesters'
     | '/settings'
     | '/demo/better-auth'
@@ -291,6 +351,7 @@ export interface FileRouteTypes {
     | '/demo/form/simple'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/semester/$semesterId/calendar'
     | '/semester/$semesterId/edit'
     | '/semester/$semesterId/'
     | '/demo/start/ssr/data-only'
@@ -299,11 +360,15 @@ export interface FileRouteTypes {
     | '/semester/$semesterId/subject/$subjectId'
     | '/semester/$semesterId/subjects/new'
     | '/demo/start/ssr/'
+    | '/semester/$semesterId/subject/$subjectId/brief'
+    | '/semester/$semesterId/subject/$subjectId/resources'
+    | '/semester/$semesterId/subject/$subjectId/review'
     | '/semester/$semesterId/subject/$subjectId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PucExplainerRoute: typeof PucExplainerRoute
   SemestersRoute: typeof SemestersRouteWithChildren
   SettingsRoute: typeof SettingsRoute
   DemoBetterAuthRoute: typeof DemoBetterAuthRoute
@@ -336,6 +401,13 @@ declare module '@tanstack/react-router' {
       path: '/semesters'
       fullPath: '/semesters'
       preLoaderRoute: typeof SemestersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/puc-explainer': {
+      id: '/puc-explainer'
+      path: '/puc-explainer'
+      fullPath: '/puc-explainer'
+      preLoaderRoute: typeof PucExplainerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -385,6 +457,13 @@ declare module '@tanstack/react-router' {
       path: '/edit'
       fullPath: '/semester/$semesterId/edit'
       preLoaderRoute: typeof SemesterSemesterIdEditRouteImport
+      parentRoute: typeof SemesterSemesterIdRoute
+    }
+    '/semester/$semesterId/calendar': {
+      id: '/semester/$semesterId/calendar'
+      path: '/calendar'
+      fullPath: '/semester/$semesterId/calendar'
+      preLoaderRoute: typeof SemesterSemesterIdCalendarRouteImport
       parentRoute: typeof SemesterSemesterIdRoute
     }
     '/demo/start/server-funcs': {
@@ -485,6 +564,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SemesterSemesterIdSubjectSubjectIdIndexRouteImport
       parentRoute: typeof SemesterSemesterIdSubjectSubjectIdRoute
     }
+    '/semester/$semesterId/subject/$subjectId/review': {
+      id: '/semester/$semesterId/subject/$subjectId/review'
+      path: '/review'
+      fullPath: '/semester/$semesterId/subject/$subjectId/review'
+      preLoaderRoute: typeof SemesterSemesterIdSubjectSubjectIdReviewRouteImport
+      parentRoute: typeof SemesterSemesterIdSubjectSubjectIdRoute
+    }
+    '/semester/$semesterId/subject/$subjectId/resources': {
+      id: '/semester/$semesterId/subject/$subjectId/resources'
+      path: '/resources'
+      fullPath: '/semester/$semesterId/subject/$subjectId/resources'
+      preLoaderRoute: typeof SemesterSemesterIdSubjectSubjectIdResourcesRouteImport
+      parentRoute: typeof SemesterSemesterIdSubjectSubjectIdRoute
+    }
+    '/semester/$semesterId/subject/$subjectId/brief': {
+      id: '/semester/$semesterId/subject/$subjectId/brief'
+      path: '/brief'
+      fullPath: '/semester/$semesterId/subject/$subjectId/brief'
+      preLoaderRoute: typeof SemesterSemesterIdSubjectSubjectIdBriefRouteImport
+      parentRoute: typeof SemesterSemesterIdSubjectSubjectIdRoute
+    }
   }
 }
 
@@ -501,11 +601,20 @@ const SemestersRouteWithChildren = SemestersRoute._addFileChildren(
 )
 
 interface SemesterSemesterIdSubjectSubjectIdRouteChildren {
+  SemesterSemesterIdSubjectSubjectIdBriefRoute: typeof SemesterSemesterIdSubjectSubjectIdBriefRoute
+  SemesterSemesterIdSubjectSubjectIdResourcesRoute: typeof SemesterSemesterIdSubjectSubjectIdResourcesRoute
+  SemesterSemesterIdSubjectSubjectIdReviewRoute: typeof SemesterSemesterIdSubjectSubjectIdReviewRoute
   SemesterSemesterIdSubjectSubjectIdIndexRoute: typeof SemesterSemesterIdSubjectSubjectIdIndexRoute
 }
 
 const SemesterSemesterIdSubjectSubjectIdRouteChildren: SemesterSemesterIdSubjectSubjectIdRouteChildren =
   {
+    SemesterSemesterIdSubjectSubjectIdBriefRoute:
+      SemesterSemesterIdSubjectSubjectIdBriefRoute,
+    SemesterSemesterIdSubjectSubjectIdResourcesRoute:
+      SemesterSemesterIdSubjectSubjectIdResourcesRoute,
+    SemesterSemesterIdSubjectSubjectIdReviewRoute:
+      SemesterSemesterIdSubjectSubjectIdReviewRoute,
     SemesterSemesterIdSubjectSubjectIdIndexRoute:
       SemesterSemesterIdSubjectSubjectIdIndexRoute,
   }
@@ -516,6 +625,7 @@ const SemesterSemesterIdSubjectSubjectIdRouteWithChildren =
   )
 
 interface SemesterSemesterIdRouteChildren {
+  SemesterSemesterIdCalendarRoute: typeof SemesterSemesterIdCalendarRoute
   SemesterSemesterIdEditRoute: typeof SemesterSemesterIdEditRoute
   SemesterSemesterIdIndexRoute: typeof SemesterSemesterIdIndexRoute
   SemesterSemesterIdSubjectSubjectIdRoute: typeof SemesterSemesterIdSubjectSubjectIdRouteWithChildren
@@ -523,6 +633,7 @@ interface SemesterSemesterIdRouteChildren {
 }
 
 const SemesterSemesterIdRouteChildren: SemesterSemesterIdRouteChildren = {
+  SemesterSemesterIdCalendarRoute: SemesterSemesterIdCalendarRoute,
   SemesterSemesterIdEditRoute: SemesterSemesterIdEditRoute,
   SemesterSemesterIdIndexRoute: SemesterSemesterIdIndexRoute,
   SemesterSemesterIdSubjectSubjectIdRoute:
@@ -535,6 +646,7 @@ const SemesterSemesterIdRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PucExplainerRoute: PucExplainerRoute,
   SemestersRoute: SemestersRouteWithChildren,
   SettingsRoute: SettingsRoute,
   DemoBetterAuthRoute: DemoBetterAuthRoute,

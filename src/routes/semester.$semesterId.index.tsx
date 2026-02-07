@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
+	CalendarDays,
 	GraduationCap,
 	MoreHorizontal,
 	Pencil,
@@ -9,7 +10,7 @@ import {
 import { toast } from "sonner";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
-import { Badge } from "@/components/ui/badge";
+import { SubjectCard } from "@/components/subject-card";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -29,8 +30,9 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getSubjectsBySemester } from "@/data/mock/store";
+import { useEventsBySemester } from "@/hooks/queries/use-events";
 import { useDeleteSemester, useSemester } from "@/hooks/queries/use-semesters";
+import { useSubjectsBySemester } from "@/hooks/queries/use-subjects";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/semester/$semesterId/")({
@@ -44,7 +46,8 @@ function SemesterDetailPage() {
 	const { data: semester, isLoading } = useSemester(semesterId);
 	const deleteSemester = useDeleteSemester();
 
-	const subjects = semester ? getSubjectsBySemester(semester.id) : [];
+	const { data: subjects = [] } = useSubjectsBySemester(semesterId);
+	const { data: events = [] } = useEventsBySemester(semesterId);
 
 	if (isLoading) {
 		return (
@@ -102,6 +105,15 @@ function SemesterDetailPage() {
 				description={`${startFormatted} \u2014 ${endFormatted}`}
 				actions={
 					<div className="flex items-center gap-2">
+						<Button variant="outline" size="sm" asChild>
+							<Link
+								to="/semester/$semesterId/calendar"
+								params={{ semesterId: semester.id }}
+							>
+								<CalendarDays className="w-3.5 h-3.5 mr-1.5" />
+								{t.semester.calendar}
+							</Link>
+						</Button>
 						<Button variant="outline" size="sm" asChild>
 							<Link
 								to="/semester/$semesterId/edit"
@@ -168,6 +180,11 @@ function SemesterDetailPage() {
 						value: String(subjects.length),
 						icon: GraduationCap,
 					},
+					{
+						label: t.calendar.title,
+						value: String(events.length),
+						icon: CalendarDays,
+					},
 				].map((stat) => (
 					<div
 						key={stat.label}
@@ -217,32 +234,11 @@ function SemesterDetailPage() {
 				) : (
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						{subjects.map((subject) => (
-							<Link
+							<SubjectCard
 								key={subject.id}
-								to="/semester/$semesterId/subject/$subjectId"
-								params={{
-									semesterId: semester.id,
-									subjectId: subject.id,
-								}}
-								className="group"
-							>
-								<div className="bg-card rounded-xl border border-border p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5">
-									<div className="flex items-start justify-between mb-2">
-										<Badge
-											variant="outline"
-											className="text-[10px] uppercase tracking-wider"
-										>
-											{subject.code}
-										</Badge>
-									</div>
-									<h3 className="font-display text-lg group-hover:text-primary transition-colors mb-1">
-										{subject.name}
-									</h3>
-									<p className="text-sm text-muted-foreground">
-										{subject.instructor}
-									</p>
-								</div>
-							</Link>
+								subject={subject}
+								semesterId={semester.id}
+							/>
 						))}
 					</div>
 				)}
