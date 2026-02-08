@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSemester, useUpdateSemester } from "@/hooks/queries/use-semesters";
+import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/semester/$semesterId/edit")({
@@ -64,7 +65,10 @@ function EditForm({
 			}),
 		},
 		onSubmit: async ({ value }) => {
-			await updateSemester.mutateAsync(value);
+			await updateSemester.mutateAsync({
+				id: asId<"semesters">(semester.id),
+				...value,
+			});
 			toast.success(t.semester.edit);
 			navigate({
 				to: "/semester/$semesterId",

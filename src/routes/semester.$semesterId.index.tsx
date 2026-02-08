@@ -33,7 +33,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEventsBySemester } from "@/hooks/queries/use-events";
 import { useDeleteSemester, useSemester } from "@/hooks/queries/use-semesters";
-import { useSubjectsBySemester } from "@/hooks/queries/use-subjects";
+import { useSubjectsBySemesterWithPuc } from "@/hooks/queries/use-subjects";
+import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/semester/$semesterId/")({
@@ -47,7 +48,7 @@ function SemesterDetailPage() {
 	const { data: semester, isLoading } = useSemester(semesterId);
 	const deleteSemester = useDeleteSemester();
 
-	const { data: subjects = [] } = useSubjectsBySemester(semesterId);
+	const { data: subjects = [] } = useSubjectsBySemesterWithPuc(semesterId);
 	const { data: events = [] } = useEventsBySemester(semesterId);
 
 	if (isLoading) {
@@ -79,7 +80,7 @@ function SemesterDetailPage() {
 	}
 
 	const handleDelete = async () => {
-		await deleteSemester.mutateAsync(semester.id);
+		await deleteSemester.mutateAsync({ id: asId<"semesters">(semester.id) });
 		toast.success(t.semester.delete);
 		navigate({ to: "/semesters" });
 	};
@@ -248,6 +249,8 @@ function SemesterDetailPage() {
 								key={subject.id}
 								subject={subject}
 								semesterId={semester.id}
+								pucStatus={subject.pucStatus}
+								pucFileName={subject.pucFileName}
 							/>
 						))}
 					</div>

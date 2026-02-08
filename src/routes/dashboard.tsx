@@ -1,3 +1,5 @@
+import { convexQuery } from "@convex-dev/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	AlertCircle,
@@ -15,14 +17,11 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	getResourcesBySubject,
-	getSubjectsBySemester,
-} from "@/data/mock/store";
 import { useEventsBySemester } from "@/hooks/queries/use-events";
 import { useSemesters } from "@/hooks/queries/use-semesters";
 import { useI18n } from "@/lib/i18n";
 import type { CalendarEvent, Resource, Semester, Subject } from "@/lib/types";
+import { api } from "../../convex/_generated/api";
 
 export const Route = createFileRoute("/dashboard")({
 	component: DashboardPage,
@@ -57,10 +56,14 @@ function DashboardPage() {
 		activeSemester?.id ?? "",
 	);
 
-	const subjects = useMemo(
-		() => (activeSemester ? getSubjectsBySemester(activeSemester.id) : []),
-		[activeSemester],
+	const { data: aggregated } = useQuery(
+		convexQuery(
+			api.dashboard.aggregatedData,
+			activeSemester ? { semesterId: activeSemester.id } : "skip",
+		),
 	);
+
+	const subjects = aggregated?.subjects ?? [];
 
 	const subjectNames = useMemo(() => {
 		const map: Record<string, string> = {};
@@ -98,15 +101,7 @@ function DashboardPage() {
 
 			const needsConfirmation = allEvents.filter((e) => e.status === "pending");
 
-			const pinned: Array<Resource & { subjectName: string }> = [];
-			for (const sub of subjects) {
-				const res = getResourcesBySubject(sub.id);
-				for (const r of res) {
-					if (r.pinned) {
-						pinned.push({ ...r, subjectName: sub.name });
-					}
-				}
-			}
+			const pinned = aggregated?.pinnedResources ?? [];
 
 			return {
 				upcoming,
@@ -114,7 +109,7 @@ function DashboardPage() {
 				needsConfirmation,
 				pinnedResources: pinned,
 			};
-		}, [allEvents, subjects]);
+		}, [allEvents, aggregated]);
 
 	if (semLoading || evtLoading) {
 		return (

@@ -1,70 +1,23 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-	createResource,
-	deleteResource,
-	fetchResourcesBySubject,
-	togglePin,
-	updateResource,
-} from "@/lib/api/resources";
-import type { CreateResourceInput, UpdateResourceInput } from "@/lib/types";
-
-export const resourceKeys = {
-	bySubject: (subjectId: string) =>
-		["resources", "subject", subjectId] as const,
-};
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../../../convex/_generated/api";
 
 export function useResourcesBySubject(subjectId: string) {
-	return useQuery({
-		queryKey: resourceKeys.bySubject(subjectId),
-		queryFn: () => fetchResourcesBySubject(subjectId),
-	});
+	return useQuery(convexQuery(api.resources.listBySubject, { subjectId }));
 }
 
-export function useCreateResource(subjectId: string) {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: (input: CreateResourceInput) => createResource(input),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: resourceKeys.bySubject(subjectId),
-			});
-		},
-	});
+export function useCreateResource(_subjectId: string) {
+	return useConvexMutation(api.resources.create);
 }
 
-export function useUpdateResource(subjectId: string) {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: ({ id, data }: { id: string; data: UpdateResourceInput }) =>
-			updateResource(id, data),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: resourceKeys.bySubject(subjectId),
-			});
-		},
-	});
+export function useUpdateResource(_subjectId: string) {
+	return useConvexMutation(api.resources.update);
 }
 
-export function useDeleteResource(subjectId: string) {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: (id: string) => deleteResource(id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: resourceKeys.bySubject(subjectId),
-			});
-		},
-	});
+export function useDeleteResource(_subjectId: string) {
+	return useConvexMutation(api.resources.remove);
 }
 
-export function useTogglePin(subjectId: string) {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: (id: string) => togglePin(id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: resourceKeys.bySubject(subjectId),
-			});
-		},
-	});
+export function useTogglePin(_subjectId: string) {
+	return useConvexMutation(api.resources.togglePin);
 }

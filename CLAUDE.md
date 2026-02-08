@@ -10,12 +10,20 @@ Semester Manager UI - A bilingual (EN/PT-PT) web platform that converts uploaded
 
 ```bash
 npm run dev        # Start dev server on port 3000
+npx convex dev     # Start Convex dev server (runs alongside npm run dev)
 npm run build      # Build for production
 npm run test       # Run tests (Vitest)
 npm run lint       # Lint with Biome
 npm run format     # Format with Biome
 npm run check      # Biome check (lint + format)
 npm run deploy     # Build and deploy to Cloudflare Workers
+```
+
+### Convex commands
+```bash
+npx convex dev              # Start dev server + codegen (interactive setup on first run)
+npx convex run seed:seedData # Seed the database with demo data
+npx convex codegen          # Regenerate types without dev server
 ```
 
 ### Adding Shadcn components
@@ -27,9 +35,10 @@ pnpm dlx shadcn@latest add <component>
 
 ### Stack
 - **Framework**: TanStack Start (React 19 + SSR) with TanStack Router (file-based routing)
-- **Data Fetching**: TanStack Query with SSR integration
+- **Backend**: Convex (real-time database, serverless functions, file storage)
+- **Data Fetching**: TanStack Query + `@convex-dev/react-query` (reactive subscriptions via `convexQuery`). No SSR dehydration (Convex is client-only)
 - **Forms**: TanStack Form with Zod validation (app form hook at `src/components/forms/`)
-- **Auth**: Better Auth (email/password, configured for TanStack Start cookies)
+- **Auth**: Better Auth (email/password, configured for TanStack Start cookies) — not yet wired into Convex
 - **Styling**: Tailwind CSS v4 + Shadcn UI (new-york style) with warm parchment/terracotta theme
 - **Fonts**: DM Serif Text (headings) + DM Sans (body)
 - **i18n**: Custom lightweight system (2 locales: EN/PT-PT, ~300 keys, full type safety)
@@ -37,32 +46,53 @@ pnpm dlx shadcn@latest add <component>
 - **Calendar Export**: Client-side RFC 5545 .ics generation (full or due-dates-only)
 
 ### Key Directories
+- `convex/` - Convex backend functions (schema, queries, mutations, seed data)
 - `src/routes/` - File-based routing (TanStack Router auto-generates `routeTree.gen.ts`)
 - `src/routes/api/` - API routes (e.g., `auth/$.ts` for Better Auth catch-all)
 - `src/components/ui/` - Shadcn UI components
 - `src/components/layout/` - App shell, sidebar, page header, empty state
 - `src/components/forms/` - App form hook, context, field components (TextField, TextArea, Select, DateField)
 - `src/components/` - Feature components (semester-card, subject-card, event-card, resource-item, brief-editor, puc-upload, locale-switcher, etc.)
-- `src/integrations/` - Third-party integration wrappers (tanstack-query, better-auth)
-- `src/lib/` - Utilities, auth, types, i18n, API functions
+- `src/integrations/` - Third-party integration wrappers (tanstack-query + Convex, better-auth)
+- `src/lib/` - Utilities, auth, types, i18n, helpers
 - `src/lib/i18n/` - i18n provider, translations (en.ts, pt.ts)
-- `src/lib/api/` - Async API functions (mock now, HTTP later) — **only layer that changes when swapping backend**
-- `src/hooks/queries/` - TanStack Query hooks (useQuery/useMutation wrappers)
-- `src/data/mock/` - In-memory CRUD store with realistic seed data (2 subjects, ~10 events each, resources, briefs)
+- `src/lib/api/` - Client-side API utilities (calendar-export.ts)
+- `src/hooks/queries/` - TanStack Query hooks wrapping Convex queries/mutations
 
-### Data Architecture (Three-layer pattern)
+### Data Architecture
 ```
-src/data/mock/          → Static seed data + in-memory CRUD store
-src/lib/api/            → Async functions (call mock now, HTTP later) ← ONLY layer that changes
-src/hooks/queries/      → TanStack Query hooks (useQuery/useMutation wrappers)
+convex/                     → Schema, queries, mutations (server-side)
+src/hooks/queries/          → TanStack Query hooks using convexQuery + useConvexMutation
+src/components + routes     → React UI consuming hooks
 ```
+
+### Convex Backend (`convex/`)
+| File | Purpose |
+|------|---------|
+| `schema.ts` | Table definitions with indexes |
+| `semesters.ts` | Semester CRUD (list, get, listWithSubjects, create, update, remove) |
+| `subjects.ts` | Subject CRUD (listBySemester, listBySemesterWithPuc, get, create, remove) |
+| `events.ts` | Calendar events (listBySemester, listBySubject, update, confirm) |
+| `briefs.ts` | Subject briefs (getBySubject, update) |
+| `resources.ts` | Resources (listBySubject, create, update, remove, togglePin) |
+| `puc.ts` | PUC docs (getBySubject, generateUploadUrl, upload, updateStatus) |
+| `dashboard.ts` | Aggregation query (subjects + pinned resources for dashboard) |
+| `seed.ts` | Seed mutation for demo data |
+
+All Convex queries map `_id` → `id` and `_creationTime` → `createdAt` to match `src/lib/types.ts` interfaces.
 
 ### Type Definitions
 All core entities in `src/lib/types.ts`: Semester, Subject, PUCDocument, SubjectBrief, CalendarEvent, Resource, plus input types for CRUD operations.
 
+### ID Handling
+- Convex **query** args use `v.string()` + `ctx.db.normalizeId()` to gracefully handle invalid IDs (returns `null`/`[]` instead of throwing)
+- Convex **mutation** args use `v.id("tableName")` (they receive valid Convex IDs from already-loaded data)
+- `src/lib/convex-helpers.ts` exports `asId<T>(id: string)` to cast URL param strings to Convex `Id<T>` types (used in mutation calls only)
+- Hooks pass plain strings to queries (no `asId` needed); use `"skip"` token for empty/missing IDs
+
 ### Routing Patterns
 - Routes in `src/routes/` map to URLs (e.g., `index.tsx` → `/`, `semesters.tsx` → `/semesters`)
-- Root layout at `src/routes/__root.tsx` wraps all pages with I18nProvider and AppShell
+- Root layout at `src/routes/__root.tsx` wraps all pages with ConvexProvider, QueryClientProvider, I18nProvider, and AppShell
 - `index.tsx` redirects to `/dashboard`
 - Semester detail uses layout route: `semester.$semesterId.tsx` → `semester.$semesterId.index.tsx`
 - Subject detail uses nested layout: `semester.$semesterId.subject.$subjectId.tsx` (tabbed: overview, review, brief, resources)
@@ -96,17 +126,6 @@ const { t } = useI18n()
 ```
 Locale stored in localStorage, detected from browser language on first visit. `<html lang>` driven by current locale.
 
-### API Layer (`src/lib/api/`)
-| File | Purpose |
-|------|---------|
-| `semesters.ts` | Semester CRUD |
-| `subjects.ts` | Subject CRUD by semester |
-| `puc.ts` | PUC upload + extraction status polling |
-| `events.ts` | Calendar events CRUD + confirm |
-| `briefs.ts` | Subject brief fetch + update |
-| `resources.ts` | Resource CRUD + pin toggle |
-| `calendar-export.ts` | Client-side .ics generation + download |
-
 ### Code Style
 - Biome for linting/formatting (tabs, double quotes)
 - Path alias: `@/*` → `./src/*`
@@ -114,9 +133,12 @@ Locale stored in localStorage, detected from browser language on first visit. `<
 - TypeScript strict mode enabled
 
 ### Implementation Status
-All MVP features are implemented (Phases 0-6 complete):
+All MVP features are implemented (Phases 0-6 complete) + Convex backend migration:
 - Semester CRUD, Subject management, PUC upload/extraction
 - Calendar events (view/edit/confirm), month calendar view
 - Subject briefs (AI-generated, editable), Resources (CRUD, pin/sort)
 - Dashboard with aggregated data, .ics export, Settings, full EN/PT-PT i18n
-- Demo files cleaned up
+- Real-time data via Convex (queries auto-update across tabs)
+
+### Auth (Deferred)
+Auth is configured (Better Auth) but not wired into Convex. All queries use hardcoded `userId: "user-1"`. Auth integration is a follow-up task.

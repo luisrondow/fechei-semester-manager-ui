@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, Download, FileText } from "lucide-react";
+import { useMemo } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEventsBySemester } from "@/hooks/queries/use-events";
 import { useSemester } from "@/hooks/queries/use-semesters";
+import { useSubjectsBySemester } from "@/hooks/queries/use-subjects";
 import { downloadICS, type ExportMode } from "@/lib/api/calendar-export";
 import { useI18n } from "@/lib/i18n";
 
@@ -17,17 +19,33 @@ export const Route = createFileRoute("/semester/$semesterId/export")({
 function ExportPage() {
 	const { semesterId } = Route.useParams();
 	const { t } = useI18n();
-	const { isLoading: semLoading } = useSemester(semesterId);
+	const { data: semester, isLoading: semLoading } = useSemester(semesterId);
 	const { data: events = [], isLoading: evtLoading } =
 		useEventsBySemester(semesterId);
+	const { data: subjects = [] } = useSubjectsBySemester(semesterId);
+
+	const subjectNames = useMemo(() => {
+		const map: Record<string, string> = {};
+		for (const s of subjects) {
+			map[s.id] = s.name;
+		}
+		return map;
+	}, [subjects]);
 
 	const assessments = events.filter(
 		(e) => e.type === "assessment" || e.type === "tbd",
 	);
 
 	const handleExport = (mode: ExportMode) => {
+		if (!semester) return;
 		try {
-			downloadICS(semesterId, mode);
+			downloadICS({
+				events,
+				subjectNames,
+				semesterName: semester.name,
+				timezone: semester.timezone,
+				mode,
+			});
 			toast.success(t.export.downloaded);
 		} catch {
 			toast.error(t.common.error);

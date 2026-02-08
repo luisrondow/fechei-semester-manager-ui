@@ -1,58 +1,25 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-	createSubject,
-	deleteSubject,
-	fetchSubject,
-	fetchSubjectsBySemester,
-} from "@/lib/api/subjects";
-import type { CreateSubjectInput } from "@/lib/types";
-import { semesterKeys } from "./use-semesters";
-
-export const subjectKeys = {
-	bySemester: (semesterId: string) => ["subjects", semesterId] as const,
-	detail: (id: string) => ["subjects", "detail", id] as const,
-};
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../../../convex/_generated/api";
 
 export function useSubjectsBySemester(semesterId: string) {
-	return useQuery({
-		queryKey: subjectKeys.bySemester(semesterId),
-		queryFn: () => fetchSubjectsBySemester(semesterId),
-	});
+	return useQuery(convexQuery(api.subjects.listBySemester, { semesterId }));
+}
+
+export function useSubjectsBySemesterWithPuc(semesterId: string) {
+	return useQuery(
+		convexQuery(api.subjects.listBySemesterWithPuc, { semesterId }),
+	);
 }
 
 export function useSubject(id: string) {
-	return useQuery({
-		queryKey: subjectKeys.detail(id),
-		queryFn: () => fetchSubject(id),
-	});
+	return useQuery(convexQuery(api.subjects.get, { id }));
 }
 
-export function useCreateSubject(semesterId: string) {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: (input: CreateSubjectInput) => createSubject(input),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: subjectKeys.bySemester(semesterId),
-			});
-			queryClient.invalidateQueries({
-				queryKey: semesterKeys.detail(semesterId),
-			});
-		},
-	});
+export function useCreateSubject(_semesterId: string) {
+	return useConvexMutation(api.subjects.create);
 }
 
-export function useDeleteSubject(semesterId: string) {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: (id: string) => deleteSubject(id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: subjectKeys.bySemester(semesterId),
-			});
-			queryClient.invalidateQueries({
-				queryKey: semesterKeys.detail(semesterId),
-			});
-		},
-	});
+export function useDeleteSubject(_semesterId: string) {
+	return useConvexMutation(api.subjects.remove);
 }

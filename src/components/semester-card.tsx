@@ -1,9 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { CalendarDays, ChevronRight, GraduationCap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { getSubjectsBySemester } from "@/data/mock/store";
 import { useI18n } from "@/lib/i18n";
-import type { Semester } from "@/lib/types";
+import type { Semester, Subject } from "@/lib/types";
 
 function getSemesterStatus(
 	semester: Semester,
@@ -26,10 +25,15 @@ function formatDateRange(startDate: string, endDate: string): string {
 	return `${start.toLocaleDateString("en-GB", opts)} \u2014 ${end.toLocaleDateString("en-GB", opts)}`;
 }
 
-export function SemesterCard({ semester }: { semester: Semester }) {
+export function SemesterCard({
+	semester,
+	subjects,
+}: {
+	semester: Semester;
+	subjects: Subject[];
+}) {
 	const { t } = useI18n();
 	const status = getSemesterStatus(semester);
-	const subjects = getSubjectsBySemester(semester.id);
 
 	const statusConfig = {
 		active: {

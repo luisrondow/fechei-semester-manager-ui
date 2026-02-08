@@ -25,6 +25,7 @@ import {
 	useTogglePin,
 	useUpdateResource,
 } from "@/hooks/queries/use-resources";
+import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
 import type { Resource } from "@/lib/types";
 
@@ -51,25 +52,31 @@ function ResourcesPage() {
 	const handleTogglePin = useCallback(
 		(id: string) => {
 			const resource = resources.find((r) => r.id === id);
-			togglePin.mutate(id, {
-				onSuccess: () => {
-					toast.success(
-						resource?.pinned ? t.resource.unpinned : t.resource.pinned,
-					);
+			togglePin.mutate(
+				{ id: asId<"resources">(id) },
+				{
+					onSuccess: () => {
+						toast.success(
+							resource?.pinned ? t.resource.unpinned : t.resource.pinned,
+						);
+					},
 				},
-			});
+			);
 		},
 		[togglePin, resources, t.resource.pinned, t.resource.unpinned],
 	);
 
 	const handleDelete = useCallback(
 		(id: string) => {
-			deleteResource.mutate(id, {
-				onSuccess: () => {
-					toast.success(t.resource.deleted);
-					setDeleteId(null);
+			deleteResource.mutate(
+				{ id: asId<"resources">(id) },
+				{
+					onSuccess: () => {
+						toast.success(t.resource.deleted);
+						setDeleteId(null);
+					},
 				},
-			});
+			);
 		},
 		[deleteResource, t.resource.deleted],
 	);
@@ -99,7 +106,10 @@ function ResourcesPage() {
 						<ResourceForm
 							subjectId={subjectId}
 							onSave={async (data) => {
-								await createResource.mutateAsync(data);
+								await createResource.mutateAsync({
+									...data,
+									subjectId: asId<"subjects">(data.subjectId),
+								});
 								toast.success(t.resource.created);
 								setAddOpen(false);
 							}}
@@ -131,13 +141,11 @@ function ResourcesPage() {
 							resource={editingResource}
 							onSave={async (data) => {
 								await updateResource.mutateAsync({
-									id: editingResource.id,
-									data: {
-										title: data.title,
-										url: data.url,
-										notes: data.notes,
-										tags: data.tags,
-									},
+									id: asId<"resources">(editingResource.id),
+									title: data.title,
+									url: data.url,
+									notes: data.notes,
+									tags: data.tags,
 								});
 								toast.success(t.resource.updated);
 								setEditingResource(null);

@@ -24,13 +24,16 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { updatePUCStatus } from "@/data/mock/store";
 import { useBrief } from "@/hooks/queries/use-briefs";
 import { useEventsBySubject } from "@/hooks/queries/use-events";
-import { usePUC } from "@/hooks/queries/use-puc";
+import {
+	usePUC,
+	useUpdatePUCStatus,
+	useUploadPUC,
+} from "@/hooks/queries/use-puc";
 import { useResourcesBySubject } from "@/hooks/queries/use-resources";
 import { useDeleteSubject, useSubject } from "@/hooks/queries/use-subjects";
-import { uploadPUC } from "@/lib/api/puc";
+import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
 import type { PUCProcessingStatus } from "@/lib/types";
 
@@ -45,11 +48,13 @@ function SubjectOverviewPage() {
 	const { t } = useI18n();
 	const navigate = useNavigate();
 	const { data: subject, isLoading } = useSubject(subjectId);
-	const { data: puc, refetch: refetchPuc } = usePUC(subjectId);
+	const { data: puc } = usePUC(subjectId);
 	const { data: events = [] } = useEventsBySubject(subjectId);
 	const { data: brief } = useBrief(subjectId);
 	const { data: resourcesList = [] } = useResourcesBySubject(subjectId);
 	const deleteSubject = useDeleteSubject(semesterId);
+	const uploadPUC = useUploadPUC(subjectId, semesterId);
+	const updatePUCStatus = useUpdatePUCStatus();
 
 	const assessments = events.filter((e) => e.type === "assessment");
 	const studyBlocks = events.filter((e) => e.type === "study_block");
@@ -62,26 +67,34 @@ function SubjectOverviewPage() {
 	const handlePUCUpload = useCallback(
 		async (file: File) => {
 			setUploadingStatus("uploading");
-			const doc = await uploadPUC(subjectId, file.name);
+			const doc = await uploadPUC.mutateAsync({
+				subjectId: asId<"subjects">(subjectId),
+				fileName: file.name,
+			});
 
 			setTimeout(() => {
 				setUploadingStatus("processing");
-				updatePUCStatus(doc.id, "processing");
+				updatePUCStatus.mutate({
+					id: asId<"pucDocuments">(doc.id),
+					status: "processing",
+				});
 			}, 1500);
 
 			setTimeout(() => {
 				setUploadingStatus("extracted");
-				updatePUCStatus(doc.id, "extracted");
-				refetchPuc();
+				updatePUCStatus.mutate({
+					id: asId<"pucDocuments">(doc.id),
+					status: "extracted",
+				});
 				toast.success(t.puc.extracted);
 			}, 4000);
 		},
-		[subjectId, refetchPuc, t.puc.extracted],
+		[subjectId, uploadPUC, updatePUCStatus, t.puc.extracted],
 	);
 
 	const handleDelete = async () => {
 		if (!subject) return;
-		await deleteSubject.mutateAsync(subject.id);
+		await deleteSubject.mutateAsync({ id: asId<"subjects">(subject.id) });
 		toast.success(t.subject.deleted);
 		navigate({
 			to: "/semester/$semesterId",
@@ -245,7 +258,7 @@ function SubjectOverviewPage() {
 									label: t.event.tbd,
 								},
 							};
-							const cfg = typeConfig[event.type];
+							const cfg = typeConfig[event.type as keyof typeof typeConfig];
 
 							return (
 								<div
