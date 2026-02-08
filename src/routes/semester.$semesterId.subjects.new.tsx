@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod/v4";
 import { useAppForm } from "@/components/forms/form-hook";
@@ -8,9 +8,12 @@ import { PageHeader } from "@/components/layout/page-header";
 import { PUCExplainerCard } from "@/components/puc-explainer-card";
 import { PUCUpload } from "@/components/puc-upload";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSemester } from "@/hooks/queries/use-semesters";
 import { useCreateSubject } from "@/hooks/queries/use-subjects";
 import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
+import { isSemesterArchived } from "@/lib/semester-utils";
 
 export const Route = createFileRoute("/semester/$semesterId/subjects/new")({
 	component: NewSubjectPage,
@@ -20,12 +23,15 @@ function NewSubjectPage() {
 	const { semesterId } = Route.useParams();
 	const { t } = useI18n();
 	const navigate = useNavigate();
+	const { data: semester, isLoading: semLoading } = useSemester(semesterId);
 	const createSubject = useCreateSubject(semesterId);
 	const [pucFile, setPucFile] = useState<File | null>(null);
 
 	const handleFileSelect = useCallback((file: File) => {
 		setPucFile(file);
 	}, []);
+
+	const isArchived = semester ? isSemesterArchived(semester) : false;
 
 	const form = useAppForm({
 		defaultValues: {
@@ -61,6 +67,25 @@ function NewSubjectPage() {
 			}
 		},
 	});
+
+	useEffect(() => {
+		if (isArchived) {
+			navigate({
+				to: "/semester/$semesterId",
+				params: { semesterId },
+				replace: true,
+			});
+		}
+	}, [isArchived, navigate, semesterId]);
+
+	if (semLoading || isArchived) {
+		return (
+			<div className="max-w-2xl space-y-6 py-4">
+				<Skeleton className="h-9 w-48" />
+				<Skeleton className="h-10 w-full" />
+			</div>
+		);
+	}
 
 	return (
 		<div className="max-w-2xl py-4">

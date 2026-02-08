@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { assertNotArchived, getSemesterIdForSubject } from "./helpers";
 
 export const listBySemester = query({
 	args: { semesterId: v.string() },
@@ -77,6 +78,7 @@ export const create = mutation({
 		instructor: v.string(),
 	},
 	handler: async (ctx, args) => {
+		await assertNotArchived(ctx, args.semesterId);
 		const id = await ctx.db.insert("subjects", {
 			semesterId: args.semesterId,
 			name: args.name,
@@ -98,6 +100,8 @@ export const create = mutation({
 export const remove = mutation({
 	args: { id: v.id("subjects") },
 	handler: async (ctx, args) => {
+		const semesterId = await getSemesterIdForSubject(ctx, args.id);
+		await assertNotArchived(ctx, semesterId);
 		// Cascade delete children
 		const events = await ctx.db
 			.query("calendarEvents")

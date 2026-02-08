@@ -7,13 +7,15 @@ import type { Resource } from "@/lib/types";
 
 interface ResourceListProps {
 	resources: Resource[];
-	onTogglePin: (id: string) => void;
-	onEdit: (resource: Resource) => void;
-	onDelete: (id: string) => void;
+	readOnly?: boolean;
+	onTogglePin?: (id: string) => void;
+	onEdit?: (resource: Resource) => void;
+	onDelete?: (id: string) => void;
 }
 
 export function ResourceList({
 	resources,
+	readOnly,
 	onTogglePin,
 	onEdit,
 	onDelete,
@@ -51,6 +53,7 @@ export function ResourceList({
 				<ResourceItem
 					key={resource.id}
 					resource={resource}
+					readOnly={readOnly}
 					onTogglePin={onTogglePin}
 					onEdit={onEdit}
 					onDelete={onDelete}

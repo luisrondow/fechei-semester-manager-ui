@@ -19,13 +19,15 @@ import type { Resource } from "@/lib/types";
 
 interface ResourceItemProps {
 	resource: Resource;
-	onTogglePin: (id: string) => void;
-	onEdit: (resource: Resource) => void;
-	onDelete: (id: string) => void;
+	readOnly?: boolean;
+	onTogglePin?: (id: string) => void;
+	onEdit?: (resource: Resource) => void;
+	onDelete?: (id: string) => void;
 }
 
 export function ResourceItem({
 	resource,
+	readOnly,
 	onTogglePin,
 	onEdit,
 	onDelete,
@@ -104,34 +106,36 @@ export function ResourceItem({
 					</Button>
 				)}
 
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" size="icon" className="h-8 w-8">
-							<MoreHorizontal className="w-4 h-4" />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuItem onClick={() => onTogglePin(resource.id)}>
-							{resource.pinned ? (
-								<PinOff className="w-4 h-4 mr-2" />
-							) : (
-								<Pin className="w-4 h-4 mr-2" />
-							)}
-							{resource.pinned ? t.resource.unpin : t.resource.pin}
-						</DropdownMenuItem>
-						<DropdownMenuItem onClick={() => onEdit(resource)}>
-							<Pencil className="w-4 h-4 mr-2" />
-							{t.common.edit}
-						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={() => onDelete(resource.id)}
-							className="text-destructive"
-						>
-							<Trash2 className="w-4 h-4 mr-2" />
-							{t.common.delete}
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
+				{!readOnly && (
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="ghost" size="icon" className="h-8 w-8">
+								<MoreHorizontal className="w-4 h-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem onClick={() => onTogglePin?.(resource.id)}>
+								{resource.pinned ? (
+									<PinOff className="w-4 h-4 mr-2" />
+								) : (
+									<Pin className="w-4 h-4 mr-2" />
+								)}
+								{resource.pinned ? t.resource.unpin : t.resource.pin}
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => onEdit?.(resource)}>
+								<Pencil className="w-4 h-4 mr-2" />
+								{t.common.edit}
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								onClick={() => onDelete?.(resource.id)}
+								className="text-destructive"
+							>
+								<Trash2 className="w-4 h-4 mr-2" />
+								{t.common.delete}
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				)}
 			</div>
 		</div>
 	);

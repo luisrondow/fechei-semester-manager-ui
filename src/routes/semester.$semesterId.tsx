@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { ArchiveBanner } from "@/components/archive-banner";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -10,6 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSemester } from "@/hooks/queries/use-semesters";
 import { useI18n } from "@/lib/i18n";
+import { isSemesterArchived } from "@/lib/semester-utils";
 
 export const Route = createFileRoute("/semester/$semesterId")({
 	component: SemesterLayout,
@@ -20,6 +22,8 @@ function SemesterLayout() {
 	const { t } = useI18n();
 	const { data: semester, isLoading } = useSemester(semesterId);
 
+	const isArchived = semester ? isSemesterArchived(semester) : false;
+
 	return (
 		<div className="max-w-5xl mx-auto px-6 py-6">
 			{/* Breadcrumb */}
@@ -27,7 +31,11 @@ function SemesterLayout() {
 				<BreadcrumbList>
 					<BreadcrumbItem>
 						<BreadcrumbLink asChild>
-							<Link to="/semesters">{t.semester.title}</Link>
+							{isArchived ? (
+								<Link to="/archive">{t.archive.title}</Link>
+							) : (
+								<Link to="/semesters">{t.semester.title}</Link>
+							)}
 						</BreadcrumbLink>
 					</BreadcrumbItem>
 					<BreadcrumbSeparator />
@@ -40,6 +48,12 @@ function SemesterLayout() {
 					</BreadcrumbItem>
 				</BreadcrumbList>
 			</Breadcrumb>
+
+			{isArchived && (
+				<div className="mb-6">
+					<ArchiveBanner />
+				</div>
+			)}
 
 			<Outlet />
 		</div>

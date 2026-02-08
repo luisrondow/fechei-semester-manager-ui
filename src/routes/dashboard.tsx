@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	AlertCircle,
+	AlertTriangle,
 	BookOpen,
 	CalendarDays,
 	ChevronRight,
@@ -20,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEventsBySemester } from "@/hooks/queries/use-events";
 import { useSemesters } from "@/hooks/queries/use-semesters";
 import { useI18n } from "@/lib/i18n";
+import { dateStr, getActiveSemester } from "@/lib/semester-utils";
 import type { CalendarEvent, Resource, Semester, Subject } from "@/lib/types";
 import { api } from "../../convex/_generated/api";
 
@@ -27,27 +29,12 @@ export const Route = createFileRoute("/dashboard")({
 	component: DashboardPage,
 });
 
-function getActiveSemester(semesters: Semester[]): Semester | undefined {
-	const now = new Date();
-	// Prefer active semester
-	const active = semesters.find((s) => {
-		const start = new Date(s.startDate);
-		const end = new Date(s.endDate);
-		return now >= start && now <= end;
-	});
-	if (active) return active;
-	// Fall back to most recently created
-	return semesters.length > 0
-		? [...semesters].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
-		: undefined;
-}
-
 function DashboardPage() {
 	const { t } = useI18n();
 	const navigate = useNavigate();
 	const { data: semesters = [], isLoading: semLoading } = useSemesters();
 
-	const activeSemester = useMemo(
+	const { semester: activeSemester, hasOverlap } = useMemo(
 		() => getActiveSemester(semesters),
 		[semesters],
 	);
@@ -138,24 +125,46 @@ function DashboardPage() {
 		);
 	}
 
+	if (!activeSemester) {
+		return (
+			<div className="max-w-5xl mx-auto px-6 py-10">
+				<PageHeader title={t.dashboard.welcome} />
+				<div className="mt-8">
+					<EmptyState
+						icon={CalendarDays}
+						title={t.dashboard.noCurrentSemester}
+						description={t.dashboard.noCurrentSemesterDescription}
+						actionLabel={t.dashboard.empty.cta}
+						onAction={() => navigate({ to: "/semesters/new" })}
+					/>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="max-w-5xl mx-auto px-6 py-10 space-y-8">
 			<PageHeader
 				title={t.dashboard.welcome}
 				actions={
-					activeSemester && (
-						<Button variant="outline" size="sm" asChild>
-							<Link
-								to="/semester/$semesterId"
-								params={{ semesterId: activeSemester.id }}
-							>
-								{activeSemester.name}
-								<ChevronRight className="w-4 h-4 ml-1" />
-							</Link>
-						</Button>
-					)
+					<Button variant="outline" size="sm" asChild>
+						<Link
+							to="/semester/$semesterId"
+							params={{ semesterId: activeSemester.id }}
+						>
+							{activeSemester.name}
+							<ChevronRight className="w-4 h-4 ml-1" />
+						</Link>
+					</Button>
 				}
 			/>
+
+			{hasOverlap && (
+				<div className="flex items-center gap-2 rounded-lg border border-warning/25 bg-warning/10 p-3 text-sm text-warning-foreground">
+					<AlertTriangle className="w-4 h-4 shrink-0" />
+					<p>{t.dashboard.overlappingWarning}</p>
+				</div>
+			)}
 
 			{/* Stats overview */}
 			{activeSemester && (
@@ -386,8 +395,4 @@ function PinnedResourceRow({
 			)}
 		</div>
 	);
-}
-
-function dateStr(d: Date): string {
-	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }

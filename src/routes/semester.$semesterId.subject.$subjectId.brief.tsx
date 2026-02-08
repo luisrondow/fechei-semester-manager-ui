@@ -5,7 +5,9 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBrief } from "@/hooks/queries/use-briefs";
 import { usePUC } from "@/hooks/queries/use-puc";
+import { useSemester } from "@/hooks/queries/use-semesters";
 import { useI18n } from "@/lib/i18n";
+import { isSemesterArchived } from "@/lib/semester-utils";
 
 export const Route = createFileRoute(
 	"/semester/$semesterId/subject/$subjectId/brief",
@@ -14,10 +16,13 @@ export const Route = createFileRoute(
 });
 
 function BriefPage() {
-	const { subjectId } = Route.useParams();
+	const { semesterId, subjectId } = Route.useParams();
 	const { t } = useI18n();
+	const { data: semester } = useSemester(semesterId);
 	const { data: puc, isLoading: pucLoading } = usePUC(subjectId);
 	const { data: brief, isLoading: briefLoading } = useBrief(subjectId);
+
+	const isArchived = semester ? isSemesterArchived(semester) : false;
 
 	if (pucLoading || briefLoading) {
 		return (
@@ -38,5 +43,7 @@ function BriefPage() {
 		);
 	}
 
-	return <BriefEditor brief={brief} subjectId={subjectId} />;
+	return (
+		<BriefEditor brief={brief} subjectId={subjectId} readOnly={isArchived} />
+	);
 }

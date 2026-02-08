@@ -13,9 +13,10 @@ import type { SubjectBrief } from "@/lib/types";
 interface BriefEditorProps {
 	brief: SubjectBrief;
 	subjectId: string;
+	readOnly?: boolean;
 }
 
-export function BriefEditor({ brief, subjectId }: BriefEditorProps) {
+export function BriefEditor({ brief, subjectId, readOnly }: BriefEditorProps) {
 	const { t } = useI18n();
 	const updateBrief = useUpdateBrief(subjectId);
 
@@ -69,27 +70,29 @@ export function BriefEditor({ brief, subjectId }: BriefEditorProps) {
 					<ConfidenceBadge score={brief.confidenceScore} />
 				</div>
 
-				<div className="flex items-center gap-2">
-					{isEdited && !editing && (
-						<Button variant="ghost" size="sm" onClick={handleReset}>
-							<RotateCcw className="w-3.5 h-3.5 mr-1" />
-							{t.brief.reset}
-						</Button>
-					)}
-					{!editing && (
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => {
-								setEditText(displayText);
-								setEditing(true);
-							}}
-						>
-							<Pencil className="w-3.5 h-3.5 mr-1" />
-							{t.brief.edit}
-						</Button>
-					)}
-				</div>
+				{!readOnly && (
+					<div className="flex items-center gap-2">
+						{isEdited && !editing && (
+							<Button variant="ghost" size="sm" onClick={handleReset}>
+								<RotateCcw className="w-3.5 h-3.5 mr-1" />
+								{t.brief.reset}
+							</Button>
+						)}
+						{!editing && (
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => {
+									setEditText(displayText);
+									setEditing(true);
+								}}
+							>
+								<Pencil className="w-3.5 h-3.5 mr-1" />
+								{t.brief.edit}
+							</Button>
+						)}
+					</div>
+				)}
 			</div>
 
 			{/* Content */}

@@ -2,18 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { CalendarDays, ChevronRight, GraduationCap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n";
+import { getSemesterStatus } from "@/lib/semester-utils";
 import type { Semester, Subject } from "@/lib/types";
-
-function getSemesterStatus(
-	semester: Semester,
-): "active" | "upcoming" | "completed" {
-	const now = new Date();
-	const start = new Date(semester.startDate);
-	const end = new Date(semester.endDate);
-	if (now < start) return "upcoming";
-	if (now > end) return "completed";
-	return "active";
-}
 
 function formatDateRange(startDate: string, endDate: string): string {
 	const start = new Date(startDate);
@@ -44,8 +34,8 @@ export function SemesterCard({
 			label: t.semester.status.upcoming,
 			className: "bg-info/15 text-info border-info/25",
 		},
-		completed: {
-			label: t.semester.status.completed,
+		archived: {
+			label: t.semester.status.archived,
 			className: "bg-muted text-muted-foreground border-border",
 		},
 	};

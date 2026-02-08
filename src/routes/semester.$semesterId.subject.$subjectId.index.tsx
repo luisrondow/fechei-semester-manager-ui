@@ -32,9 +32,11 @@ import {
 	useUploadPUC,
 } from "@/hooks/queries/use-puc";
 import { useResourcesBySubject } from "@/hooks/queries/use-resources";
+import { useSemester } from "@/hooks/queries/use-semesters";
 import { useDeleteSubject, useSubject } from "@/hooks/queries/use-subjects";
 import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
+import { isSemesterArchived } from "@/lib/semester-utils";
 import type { PUCProcessingStatus } from "@/lib/types";
 
 export const Route = createFileRoute(
@@ -47,7 +49,9 @@ function SubjectOverviewPage() {
 	const { semesterId, subjectId } = Route.useParams();
 	const { t } = useI18n();
 	const navigate = useNavigate();
+	const { data: semester } = useSemester(semesterId);
 	const { data: subject, isLoading } = useSubject(subjectId);
+	const isArchived = semester ? isSemesterArchived(semester) : false;
 	const { data: puc } = usePUC(subjectId);
 	const { data: events = [] } = useEventsBySubject(subjectId);
 	const { data: brief } = useBrief(subjectId);
@@ -176,7 +180,7 @@ function SubjectOverviewPage() {
 					<h3 className="font-display text-lg">{t.subject.pucStatus}</h3>
 					<ExtractionProgress status={uploadingStatus} />
 				</div>
-			) : !hasPUC ? (
+			) : !hasPUC && !isArchived ? (
 				<div className="rounded-xl border border-dashed border-border p-6 text-center space-y-3">
 					<div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mx-auto">
 						<Upload className="w-6 h-6 text-muted-foreground" />
@@ -297,34 +301,36 @@ function SubjectOverviewPage() {
 			)}
 
 			{/* Danger zone */}
-			<div className="pt-4 border-t border-border">
-				<Dialog>
-					<DialogTrigger asChild>
-						<Button
-							variant="ghost"
-							size="sm"
-							className="text-destructive-foreground"
-						>
-							<Trash2 className="w-3.5 h-3.5 mr-1.5" />
-							{t.subject.delete}
-						</Button>
-					</DialogTrigger>
-					<DialogContent>
-						<DialogHeader>
-							<DialogTitle>{t.subject.delete}</DialogTitle>
-							<DialogDescription>{t.subject.deleteConfirm}</DialogDescription>
-						</DialogHeader>
-						<DialogFooter>
-							<DialogClose asChild>
-								<Button variant="outline">{t.common.cancel}</Button>
-							</DialogClose>
-							<Button variant="destructive" onClick={handleDelete}>
-								{t.common.delete}
+			{!isArchived && (
+				<div className="pt-4 border-t border-border">
+					<Dialog>
+						<DialogTrigger asChild>
+							<Button
+								variant="ghost"
+								size="sm"
+								className="text-destructive-foreground"
+							>
+								<Trash2 className="w-3.5 h-3.5 mr-1.5" />
+								{t.subject.delete}
 							</Button>
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
-			</div>
+						</DialogTrigger>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>{t.subject.delete}</DialogTitle>
+								<DialogDescription>{t.subject.deleteConfirm}</DialogDescription>
+							</DialogHeader>
+							<DialogFooter>
+								<DialogClose asChild>
+									<Button variant="outline">{t.common.cancel}</Button>
+								</DialogClose>
+								<Button variant="destructive" onClick={handleDelete}>
+									{t.common.delete}
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
+				</div>
+			)}
 		</div>
 	);
 }

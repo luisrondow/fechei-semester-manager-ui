@@ -24,6 +24,7 @@ export const pt: Translations = {
 	nav: {
 		dashboard: "Painel",
 		semesters: "Semestres",
+		archive: "Arquivo",
 		settings: "Defini\u00e7\u00f5es",
 		signOut: "Sair",
 		signIn: "Entrar",
@@ -53,7 +54,7 @@ export const pt: Translations = {
 		status: {
 			active: "Ativo",
 			upcoming: "Pr\u00f3ximo",
-			completed: "Conclu\u00eddo",
+			archived: "Arquivado",
 		},
 	},
 	subject: {
@@ -170,6 +171,17 @@ export const pt: Translations = {
 		noBriefDescription:
 			"Carregue e processe um documento PUC para gerar o resumo da disciplina.",
 	},
+	archive: {
+		title: "Arquivo",
+		description: "Semestres passados (apenas leitura)",
+		empty: {
+			title: "Sem semestres arquivados",
+			description:
+				"Os semestres aparecer\u00e3o aqui ap\u00f3s a data de t\u00e9rmino.",
+		},
+		readOnlyBanner: "Este semestre terminou e est\u00e1 em modo de leitura.",
+		viewArchive: "Ver arquivo",
+	},
 	dashboard: {
 		title: "Painel",
 		welcome: "Bem-vindo/a de volta",
@@ -181,6 +193,11 @@ export const pt: Translations = {
 		nothingThisWeek: "Nada agendado esta semana",
 		allConfirmed: "Todos os eventos confirmados",
 		noPinned: "Sem recursos fixados",
+		noCurrentSemester: "Sem semestre atual",
+		noCurrentSemesterDescription:
+			"Nenhum semestre corresponde \u00e0 data de hoje. Crie um novo ou verifique as datas.",
+		overlappingWarning:
+			"M\u00faltiplos semestres sobrep\u00f5em-se na data de hoje. A mostrar o mais recente.",
 		empty: {
 			title: "Come\u00e7ar",
 			description:

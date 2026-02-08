@@ -22,6 +22,7 @@ export const en = {
 	nav: {
 		dashboard: "Dashboard",
 		semesters: "Semesters",
+		archive: "Archive",
 		settings: "Settings",
 		signOut: "Sign out",
 		signIn: "Sign in",
@@ -51,7 +52,7 @@ export const en = {
 		status: {
 			active: "Active",
 			upcoming: "Upcoming",
-			completed: "Completed",
+			archived: "Archived",
 		},
 	},
 	subject: {
@@ -165,6 +166,16 @@ export const en = {
 		noBriefDescription:
 			"Upload and process a PUC document to generate the subject brief.",
 	},
+	archive: {
+		title: "Archive",
+		description: "Past semesters (read-only)",
+		empty: {
+			title: "No archived semesters",
+			description: "Semesters will appear here after their end date passes.",
+		},
+		readOnlyBanner: "This semester has ended and is read-only.",
+		viewArchive: "View archive",
+	},
 	dashboard: {
 		title: "Dashboard",
 		welcome: "Welcome back",
@@ -176,6 +187,11 @@ export const en = {
 		nothingThisWeek: "Nothing scheduled this week",
 		allConfirmed: "All events confirmed",
 		noPinned: "No pinned resources",
+		noCurrentSemester: "No current semester",
+		noCurrentSemesterDescription:
+			"No semester matches today's date. Create a new one or check your date ranges.",
+		overlappingWarning:
+			"Multiple semesters overlap on today's date. Showing the most recent one.",
 		empty: {
 			title: "Get started",
 			description:

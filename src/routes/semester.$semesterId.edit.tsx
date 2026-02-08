@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { z } from "zod/v4";
 import { useAppForm } from "@/components/forms/form-hook";
@@ -9,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSemester, useUpdateSemester } from "@/hooks/queries/use-semesters";
 import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
+import { isSemesterArchived } from "@/lib/semester-utils";
 
 export const Route = createFileRoute("/semester/$semesterId/edit")({
 	component: EditSemesterPage,
@@ -16,9 +18,22 @@ export const Route = createFileRoute("/semester/$semesterId/edit")({
 
 function EditSemesterPage() {
 	const { semesterId } = Route.useParams();
+	const navigate = useNavigate();
 	const { data: semester, isLoading } = useSemester(semesterId);
 
-	if (isLoading || !semester) {
+	const isArchived = semester ? isSemesterArchived(semester) : false;
+
+	useEffect(() => {
+		if (isArchived) {
+			navigate({
+				to: "/semester/$semesterId",
+				params: { semesterId },
+				replace: true,
+			});
+		}
+	}, [isArchived, navigate, semesterId]);
+
+	if (isLoading || !semester || isArchived) {
 		return (
 			<div className="max-w-2xl space-y-6 py-4">
 				<Skeleton className="h-9 w-48" />

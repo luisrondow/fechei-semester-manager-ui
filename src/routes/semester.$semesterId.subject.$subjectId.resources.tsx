@@ -25,8 +25,10 @@ import {
 	useTogglePin,
 	useUpdateResource,
 } from "@/hooks/queries/use-resources";
+import { useSemester } from "@/hooks/queries/use-semesters";
 import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
+import { isSemesterArchived } from "@/lib/semester-utils";
 import type { Resource } from "@/lib/types";
 
 export const Route = createFileRoute(
@@ -36,8 +38,10 @@ export const Route = createFileRoute(
 });
 
 function ResourcesPage() {
-	const { subjectId } = Route.useParams();
+	const { semesterId, subjectId } = Route.useParams();
 	const { t } = useI18n();
+	const { data: semester } = useSemester(semesterId);
+	const isArchived = semester ? isSemesterArchived(semester) : false;
 
 	const { data: resources = [], isLoading } = useResourcesBySubject(subjectId);
 	const createResource = useCreateResource(subjectId);
@@ -87,6 +91,14 @@ function ResourcesPage() {
 				{[1, 2, 3].map((i) => (
 					<Skeleton key={i} className="h-24 rounded-xl" />
 				))}
+			</div>
+		);
+	}
+
+	if (isArchived) {
+		return (
+			<div className="space-y-4">
+				<ResourceList resources={resources} readOnly />
 			</div>
 		);
 	}
