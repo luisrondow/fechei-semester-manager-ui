@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, FileText, GraduationCap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { getPUCBySubject } from "@/data/mock/store";
 import { useI18n } from "@/lib/i18n";
 import type { PUCProcessingStatus, Subject } from "@/lib/types";
 
@@ -53,12 +52,14 @@ function PUCStatusBadge({ status }: { status: PUCProcessingStatus | null }) {
 export function SubjectCard({
 	subject,
 	semesterId,
+	pucStatus,
+	pucFileName,
 }: {
 	subject: Subject;
 	semesterId: string;
+	pucStatus?: string | null;
+	pucFileName?: string | null;
 }) {
-	const puc = getPUCBySubject(subject.id);
-
 	return (
 		<Link
 			to="/semester/$semesterId/subject/$subjectId"
@@ -74,7 +75,9 @@ export function SubjectCard({
 						>
 							{subject.code}
 						</Badge>
-						<PUCStatusBadge status={puc?.status ?? null} />
+						<PUCStatusBadge
+							status={(pucStatus as PUCProcessingStatus) ?? null}
+						/>
 					</div>
 					<ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
 				</div>
@@ -88,11 +91,11 @@ export function SubjectCard({
 					<span>{subject.instructor}</span>
 				</div>
 
-				{puc?.status === "extracted" && (
+				{pucStatus === "extracted" && pucFileName && (
 					<div className="mt-3 pt-3 border-t border-border">
 						<div className="flex items-center gap-1.5 text-xs text-muted-foreground">
 							<FileText className="w-3 h-3" />
-							<span className="truncate">{puc.fileName}</span>
+							<span className="truncate">{pucFileName}</span>
 						</div>
 					</div>
 				)}

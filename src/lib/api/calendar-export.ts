@@ -1,8 +1,3 @@
-import {
-	getEventsBySemester,
-	getSemester,
-	getSubject,
-} from "@/data/mock/store";
 import type { CalendarEvent } from "@/lib/types";
 
 function formatICSDate(dateStr: string): string {
@@ -51,20 +46,21 @@ function buildVEvent(event: CalendarEvent, subjectName: string): string {
 
 export type ExportMode = "full" | "due_only";
 
-export function generateICS(
-	semesterId: string,
-	mode: ExportMode = "full",
-): string {
-	const semester = getSemester(semesterId);
-	if (!semester) throw new Error(`Semester not found: ${semesterId}`);
-
-	let events = getEventsBySemester(semesterId);
+export function generateICS(opts: {
+	events: CalendarEvent[];
+	subjectNames: Record<string, string>;
+	semesterName: string;
+	timezone: string;
+	mode?: ExportMode;
+}): string {
+	const { subjectNames, semesterName, timezone, mode = "full" } = opts;
+	let { events } = opts;
 
 	if (mode === "due_only") {
 		events = events.filter((e) => e.type === "assessment" || e.type === "tbd");
 	}
 
-	const calName = `Fechei - ${semester.name}`;
+	const calName = `Fechei - ${semesterName}`;
 
 	const lines = [
 		"BEGIN:VCALENDAR",
@@ -73,12 +69,11 @@ export function generateICS(
 		"CALSCALE:GREGORIAN",
 		"METHOD:PUBLISH",
 		`X-WR-CALNAME:${escapeICS(calName)}`,
-		`X-WR-TIMEZONE:${semester.timezone}`,
+		`X-WR-TIMEZONE:${timezone}`,
 	];
 
 	for (const event of events) {
-		const subject = getSubject(event.subjectId);
-		const subjectName = subject?.name ?? "Unknown";
+		const subjectName = subjectNames[event.subjectId] ?? "Unknown";
 		lines.push(buildVEvent(event, subjectName));
 	}
 
@@ -86,14 +81,20 @@ export function generateICS(
 	return lines.join("\r\n");
 }
 
-export function downloadICS(semesterId: string, mode: ExportMode): void {
-	const ics = generateICS(semesterId, mode);
+export function downloadICS(opts: {
+	events: CalendarEvent[];
+	subjectNames: Record<string, string>;
+	semesterName: string;
+	timezone: string;
+	mode: ExportMode;
+}): void {
+	const ics = generateICS(opts);
 	const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
 	const url = URL.createObjectURL(blob);
 
 	const a = document.createElement("a");
 	a.href = url;
-	a.download = `fechei-calendar-${mode}.ics`;
+	a.download = `fechei-calendar-${opts.mode}.ics`;
 	document.body.appendChild(a);
 	a.click();
 	document.body.removeChild(a);

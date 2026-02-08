@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SemesterCard } from "@/components/semester-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSemesters } from "@/hooks/queries/use-semesters";
+import { useSemestersWithSubjects } from "@/hooks/queries/use-semesters";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/semesters")({
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/semesters")({
 function SemestersPage() {
 	const { t } = useI18n();
 	const navigate = useNavigate();
-	const { data: semesters, isLoading } = useSemesters();
+	const { data: semesters, isLoading } = useSemestersWithSubjects();
 
 	return (
 		<div className="max-w-5xl mx-auto px-6 py-10">
@@ -52,7 +52,11 @@ function SemestersPage() {
 				) : (
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						{semesters.map((semester) => (
-							<SemesterCard key={semester.id} semester={semester} />
+							<SemesterCard
+								key={semester.id}
+								semester={semester}
+								subjects={semester.subjects}
+							/>
 						))}
 					</div>
 				)}

@@ -1,59 +1,27 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-	createSemester,
-	deleteSemester,
-	fetchSemester,
-	fetchSemesters,
-	updateSemester,
-} from "@/lib/api/semesters";
-import type { CreateSemesterInput, UpdateSemesterInput } from "@/lib/types";
-
-export const semesterKeys = {
-	all: ["semesters"] as const,
-	detail: (id: string) => ["semesters", id] as const,
-};
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../../../convex/_generated/api";
 
 export function useSemesters() {
-	return useQuery({
-		queryKey: semesterKeys.all,
-		queryFn: fetchSemesters,
-	});
+	return useQuery(convexQuery(api.semesters.list, {}));
 }
 
 export function useSemester(id: string) {
-	return useQuery({
-		queryKey: semesterKeys.detail(id),
-		queryFn: () => fetchSemester(id),
-	});
+	return useQuery(convexQuery(api.semesters.get, { id }));
+}
+
+export function useSemestersWithSubjects() {
+	return useQuery(convexQuery(api.semesters.listWithSubjects, {}));
 }
 
 export function useCreateSemester() {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: (input: CreateSemesterInput) => createSemester(input),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: semesterKeys.all });
-		},
-	});
+	return useConvexMutation(api.semesters.create);
 }
 
-export function useUpdateSemester(id: string) {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: (input: UpdateSemesterInput) => updateSemester(id, input),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: semesterKeys.all });
-			queryClient.invalidateQueries({ queryKey: semesterKeys.detail(id) });
-		},
-	});
+export function useUpdateSemester(_id: string) {
+	return useConvexMutation(api.semesters.update);
 }
 
 export function useDeleteSemester() {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: (id: string) => deleteSemester(id),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: semesterKeys.all });
-		},
-	});
+	return useConvexMutation(api.semesters.remove);
 }

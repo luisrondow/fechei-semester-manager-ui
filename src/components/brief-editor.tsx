@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateBrief } from "@/hooks/queries/use-briefs";
+import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
 import type { SubjectBrief } from "@/lib/types";
 
@@ -26,7 +27,7 @@ export function BriefEditor({ brief, subjectId }: BriefEditorProps) {
 
 	const handleSave = useCallback(async () => {
 		await updateBrief.mutateAsync({
-			briefId: brief.id,
+			id: asId<"subjectBriefs">(brief.id),
 			userEditedText: editText,
 		});
 		setEditing(false);
@@ -35,7 +36,7 @@ export function BriefEditor({ brief, subjectId }: BriefEditorProps) {
 
 	const handleReset = useCallback(async () => {
 		await updateBrief.mutateAsync({
-			briefId: brief.id,
+			id: asId<"subjectBriefs">(brief.id),
 			userEditedText: null,
 		});
 		setEditText(brief.generatedText);

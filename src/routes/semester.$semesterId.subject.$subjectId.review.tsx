@@ -18,6 +18,7 @@ import {
 	useEventsBySubject,
 } from "@/hooks/queries/use-events";
 import { usePUC } from "@/hooks/queries/use-puc";
+import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
 import type { CalendarEvent } from "@/lib/types";
 
@@ -108,9 +109,12 @@ function EventReviewCard({
 	const confirmEvent = useConfirmEvent(subjectId, semesterId);
 
 	const handleConfirm = () => {
-		confirmEvent.mutate(event.id, {
-			onSuccess: () => toast.success(t.event.confirmed),
-		});
+		confirmEvent.mutate(
+			{ id: asId<"calendarEvents">(event.id) },
+			{
+				onSuccess: () => toast.success(t.event.confirmed),
+			},
+		);
 	};
 
 	const typeConfig = {

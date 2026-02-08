@@ -9,6 +9,7 @@ import { PUCExplainerCard } from "@/components/puc-explainer-card";
 import { PUCUpload } from "@/components/puc-upload";
 import { Button } from "@/components/ui/button";
 import { useCreateSubject } from "@/hooks/queries/use-subjects";
+import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/semester/$semesterId/subjects/new")({
@@ -41,7 +42,7 @@ function NewSubjectPage() {
 		},
 		onSubmit: async ({ value }) => {
 			const subject = await createSubject.mutateAsync({
-				semesterId,
+				semesterId: asId<"semesters">(semesterId),
 				...value,
 			});
 			toast.success(t.subject.created);

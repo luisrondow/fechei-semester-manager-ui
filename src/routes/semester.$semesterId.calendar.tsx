@@ -12,9 +12,9 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getSubjectsBySemester } from "@/data/mock/store";
 import { useEventsBySemester } from "@/hooks/queries/use-events";
 import { useSemester } from "@/hooks/queries/use-semesters";
+import { useSubjectsBySemester } from "@/hooks/queries/use-subjects";
 import { useI18n } from "@/lib/i18n";
 import type { CalendarEvent } from "@/lib/types";
 
@@ -87,11 +87,11 @@ const typeConfig = {
 function CalendarPage() {
 	const { semesterId } = Route.useParams();
 	const { t, locale } = useI18n();
-	const { data: semester, isLoading: semLoading } = useSemester(semesterId);
+	const { isLoading: semLoading } = useSemester(semesterId);
 	const { data: events = [], isLoading: evtLoading } =
 		useEventsBySemester(semesterId);
+	const { data: subjects = [] } = useSubjectsBySemester(semesterId);
 
-	const subjects = semester ? getSubjectsBySemester(semester.id) : [];
 	const subjectNames: Record<string, string> = {};
 	for (const s of subjects) {
 		subjectNames[s.id] = s.name;
@@ -236,7 +236,7 @@ function CalendarPage() {
 								{/* Event dots/pills */}
 								<div className="mt-0.5 space-y-0.5">
 									{dayEvents.slice(0, 3).map((evt) => {
-										const cfg = typeConfig[evt.type];
+										const cfg = typeConfig[evt.type as keyof typeof typeConfig];
 										return (
 											<div
 												key={evt.id}

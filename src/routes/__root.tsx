@@ -12,6 +12,10 @@ import { Toaster } from "@/components/ui/sonner";
 import { detectLocale, getTranslations, I18nContext } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
+import {
+	getContext,
+	Provider as QueryProvider,
+} from "../integrations/tanstack-query/root-provider";
 import appCss from "../styles.css?url";
 
 interface MyRouterContext {
@@ -74,10 +78,12 @@ function RootDocument({ children: _ }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body>
-				<I18nContext value={{ locale, setLocale, t }}>
-					<AppShell />
-					<Toaster position="bottom-right" richColors />
-				</I18nContext>
+				<QueryProvider queryClient={getContext().queryClient}>
+					<I18nContext value={{ locale, setLocale, t }}>
+						<AppShell />
+						<Toaster position="bottom-right" richColors />
+					</I18nContext>
+				</QueryProvider>
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",

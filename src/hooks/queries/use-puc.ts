@@ -1,29 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchPUCBySubject, uploadPUC } from "@/lib/api/puc";
-import { subjectKeys } from "./use-subjects";
-
-export const pucKeys = {
-	bySubject: (subjectId: string) => ["puc", subjectId] as const,
-};
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../../../convex/_generated/api";
 
 export function usePUC(subjectId: string) {
-	return useQuery({
-		queryKey: pucKeys.bySubject(subjectId),
-		queryFn: () => fetchPUCBySubject(subjectId),
-	});
+	return useQuery(convexQuery(api.puc.getBySubject, { subjectId }));
 }
 
-export function useUploadPUC(subjectId: string, _semesterId: string) {
-	const queryClient = useQueryClient();
-	return useMutation({
-		mutationFn: (fileName: string) => uploadPUC(subjectId, fileName),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: pucKeys.bySubject(subjectId),
-			});
-			queryClient.invalidateQueries({
-				queryKey: subjectKeys.detail(subjectId),
-			});
-		},
-	});
+export function useUploadPUC(_subjectId: string, _semesterId: string) {
+	return useConvexMutation(api.puc.upload);
+}
+
+export function useUpdatePUCStatus() {
+	return useConvexMutation(api.puc.updateStatus);
 }
