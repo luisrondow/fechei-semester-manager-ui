@@ -87,6 +87,10 @@ export const pt: Translations = {
 		extracted: "Extra\u00e7\u00e3o conclu\u00edda",
 		error: "Extra\u00e7\u00e3o falhou",
 		errorRetry: "Por favor, tente carregar novamente.",
+		errorRetryButton: "Tentar novamente",
+		reprocess: "Reprocessar PUC",
+		reprocessConfirm:
+			"Isto ir\u00e1 substituir todos os eventos, resumo e recursos extra\u00eddos por IA. Os recursos guardados pelo utilizador ser\u00e3o mantidos. Continuar?",
 		whatsThis: "O que \u00e9 o PUC?",
 		noDocument: "Nenhum PUC carregado",
 		noExtraction: "Sem dados de extra\u00e7\u00e3o",

@@ -85,6 +85,10 @@ export const en = {
 		extracted: "Extraction complete",
 		error: "Extraction failed",
 		errorRetry: "Please try uploading again.",
+		errorRetryButton: "Retry",
+		reprocess: "Re-process PUC",
+		reprocessConfirm:
+			"This will replace all AI-extracted events, brief, and resources. User-saved resources will be kept. Continue?",
 		whatsThis: "What is the PUC?",
 		noDocument: "No PUC uploaded yet",
 		noExtraction: "No extraction data",

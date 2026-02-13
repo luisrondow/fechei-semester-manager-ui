@@ -1,344 +1,165 @@
-Welcome to your new TanStack app! 
+# Fechei - Semester Manager
 
-# Getting Started
+A bilingual (EN/PT-PT) web platform that converts uploaded PUC (Plano da Unidade Curricular) PDFs into organized semester calendars with AI-generated subject briefs. Built for Portuguese university students, particularly distance-learning programs like Universidade Aberta.
 
-To run this application:
+## Features
+
+- **Semester Management** — Create, edit, and archive semesters with date-based lifecycle
+- **Subject Tracking** — Organize subjects per semester with instructor and course code info
+- **AI-Powered PUC Processing** — Upload a PUC PDF and get automatic extraction of:
+  - Calendar events (assessments, study blocks, deadlines)
+  - Subject brief (markdown summary with learning objectives, methodology, study roadmap)
+  - Bibliography resources (required, complementary, other)
+- **Calendar View** — Month-based calendar with color-coded event types
+- **Event Review** — Confirm or edit AI-extracted dates before they're finalized
+- **Resource Management** — Pin, edit, and add your own resources alongside PUC-extracted ones
+- **Dashboard** — Upcoming deadlines, this week's schedule, items needing confirmation, pinned resources
+- **Calendar Export** — Download .ics files (full calendar or due-dates-only) for Google Calendar, Apple Calendar, etc.
+- **Bilingual** — Full EN/PT-PT support with browser-detected locale
+- **Archive System** — Past semesters become read-only automatically after their end date
+- **Real-time Updates** — Data syncs across tabs via Convex reactive queries
+
+## Tech Stack
+
+- **Framework**: [TanStack Start](https://tanstack.com/start) (React 19 + SSR) with file-based routing
+- **Backend**: [Convex](https://convex.dev) (real-time database, serverless functions, file storage)
+- **AI**: [Vercel AI SDK v6](https://ai-sdk.dev) + GPT-4o-mini for PUC extraction
+- **PDF Parsing**: [pdf-parse](https://www.npmjs.com/package/pdf-parse) (Node.js, text-based PDFs)
+- **Data Fetching**: TanStack Query + `@convex-dev/react-query`
+- **Forms**: TanStack Form + Zod validation
+- **Styling**: Tailwind CSS v4 + [Shadcn UI](https://ui.shadcn.com) (warm parchment/terracotta theme)
+- **i18n**: Custom lightweight system (2 locales, ~300 keys, full type safety)
+- **Deployment**: Cloudflare Workers via Wrangler
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js >= 20
+- npm
+- A [Convex](https://convex.dev) account (free tier available)
+- An [OpenAI API key](https://platform.openai.com/api-keys) (for PUC processing)
+
+### Installation
 
 ```bash
 npm install
+```
+
+### Convex Setup
+
+On first run, Convex will guide you through project creation:
+
+```bash
+npx convex dev
+```
+
+This starts the Convex dev server and generates types in `convex/_generated/`. Keep this running alongside the app.
+
+Set the OpenAI API key for AI-powered PUC processing:
+
+```bash
+npx convex env set OPENAI_API_KEY sk-...
+```
+
+Optionally seed the database with demo data:
+
+```bash
+npx convex run seed:seedData
+```
+
+### Development
+
+Run both the app dev server and Convex dev server:
+
+```bash
+# Terminal 1 — App
 npm run dev
+
+# Terminal 2 — Convex
+npx convex dev
 ```
 
-# Building For Production
+The app runs at [http://localhost:3000](http://localhost:3000).
 
-To build this application for production:
+## Scripts
 
-```bash
-npm run build
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server on port 3000 |
+| `npm run build` | Build for production |
+| `npm run test` | Run tests (Vitest) |
+| `npm run lint` | Lint with Biome |
+| `npm run format` | Format with Biome |
+| `npm run check` | Biome check (lint + format) |
+| `npm run deploy` | Build and deploy to Cloudflare Workers |
+| `npx convex dev` | Start Convex dev server + codegen |
+| `npx convex run seed:seedData` | Seed database with demo data |
+
+## Project Structure
+
+```
+convex/                  Convex backend (schema, queries, mutations, actions)
+  schema.ts              Table definitions with indexes
+  pucProcessing.ts       AI processing action ("use node")
+  semesters.ts           Semester CRUD
+  subjects.ts            Subject CRUD
+  events.ts              Calendar event queries + internal batch mutations
+  briefs.ts              Subject brief queries + internal mutations
+  resources.ts           Resource queries + internal extraction mutations
+  puc.ts                 PUC document management + internal helpers
+  dashboard.ts           Dashboard aggregation query
+  helpers.ts             Archive guards + entity resolvers
+  seed.ts                Demo data seeder
+
+src/
+  routes/                File-based routing (TanStack Router)
+  components/
+    ui/                  Shadcn UI components
+    layout/              App shell, sidebar, page header, empty state
+    forms/               Form hook, field components
+  hooks/queries/         TanStack Query hooks wrapping Convex
+  lib/
+    types.ts             Core entity types
+    i18n/                Translations (en.ts, pt.ts)
+    api/                 Client-side utilities (calendar export)
+  integrations/          Third-party wrappers (Convex, Better Auth)
+
+docs/
+  puc-processing.md      Detailed PUC processing pipeline documentation
 ```
 
-## Testing
+## How PUC Processing Works
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+1. **Upload** — User selects a PDF on the subject overview page. The file is uploaded to Convex storage.
+2. **Extract** — A Node.js action downloads the PDF and extracts text with `pdf-parse`.
+3. **Analyze** — The extracted text is sent to GPT-4o-mini with a structured output schema (Zod). The AI returns events, a brief, and resources in a single call.
+4. **Populate** — The extracted data is inserted into the database via internal mutations. All events start as "pending" for user review.
+5. **Review** — Users can confirm dates, edit events, modify the brief, and manage resources.
 
-```bash
-npm run test
-```
+Re-processing is supported — clicking "Re-process PUC" re-runs the AI on the same uploaded file, replacing old AI-extracted data while preserving user-saved resources.
 
-## Styling
-
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
+For the full technical breakdown, see [docs/puc-processing.md](docs/puc-processing.md).
 
 ## Linting & Formatting
 
-This project uses [Biome](https://biomejs.dev/) for linting and formatting. The following scripts are available:
-
-
-```bash
-npm run lint
-npm run format
-npm run check
-```
-
-
-## Shadcn
-
-Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
+This project uses [Biome](https://biomejs.dev/) for linting and formatting (tabs, double quotes):
 
 ```bash
-pnpm dlx shadcn@latest add button
+npm run check          # Check for issues
+npx biome check --write  # Auto-fix safe issues
 ```
 
-
-## Setting up Better Auth
-
-1. Generate and set the `BETTER_AUTH_SECRET` environment variable in your `.env.local`:
-
-   ```bash
-   npx @better-auth/cli secret
-   ```
-
-2. Visit the [Better Auth documentation](https://www.better-auth.com) to unlock the full potential of authentication in your app.
-
-### Adding a Database (Optional)
-
-Better Auth can work in stateless mode, but to persist user data, add a database:
-
-```typescript
-// src/lib/auth.ts
-import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-
-export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
-  // ... rest of config
-});
-```
-
-Then run migrations:
+## Adding Shadcn Components
 
 ```bash
-npx @better-auth/cli migrate
+pnpm dlx shadcn@latest add <component>
 ```
 
+## Auth
 
+Authentication is configured via [Better Auth](https://www.better-auth.com) (email/password) but not yet wired into Convex. All queries currently use a hardcoded `userId: "user-1"`. Auth integration is a follow-up task.
 
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
+## License
 
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/people",
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
-
-```bash
-npm install @tanstack/react-query @tanstack/react-query-devtools
-```
-
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
-
-```tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// ...
-
-const queryClient = new QueryClient();
-
-// ...
-
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
-```
-
-You can also add TanStack Query Devtools to the root route (optional).
-
-```tsx
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from "@tanstack/react-query";
-
-import "./App.css";
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ["people"],
-    queryFn: () =>
-      fetch("https://swapi.dev/api/people")
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-npm install @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  );
-}
-
-export default App;
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store, Derived } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
-
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+Private project.

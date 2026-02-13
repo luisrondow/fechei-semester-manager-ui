@@ -4,6 +4,7 @@ import {
 	CalendarDays,
 	FileText,
 	GraduationCap,
+	RefreshCw,
 	Trash2,
 	Upload,
 } from "lucide-react";
@@ -27,8 +28,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useBrief } from "@/hooks/queries/use-briefs";
 import { useEventsBySubject } from "@/hooks/queries/use-events";
 import {
+	useGenerateUploadUrl,
+	useProcessPuc,
 	usePUC,
-	useUpdatePUCStatus,
 	useUploadPUC,
 } from "@/hooks/queries/use-puc";
 import { useResourcesBySubject } from "@/hooks/queries/use-resources";
@@ -47,7 +49,7 @@ export const Route = createFileRoute(
 
 function SubjectOverviewPage() {
 	const { semesterId, subjectId } = Route.useParams();
-	const { t } = useI18n();
+	const { t, locale } = useI18n();
 	const navigate = useNavigate();
 	const { data: semester } = useSemester(semesterId);
 	const { data: subject, isLoading } = useSubject(subjectId);
@@ -57,44 +59,90 @@ function SubjectOverviewPage() {
 	const { data: brief } = useBrief(subjectId);
 	const { data: resourcesList = [] } = useResourcesBySubject(subjectId);
 	const deleteSubject = useDeleteSubject(semesterId);
-	const uploadPUC = useUploadPUC(subjectId, semesterId);
-	const updatePUCStatus = useUpdatePUCStatus();
+	const uploadPUC = useUploadPUC();
+	const generateUploadUrl = useGenerateUploadUrl();
+	const processPuc = useProcessPuc();
 
 	const assessments = events.filter((e) => e.type === "assessment");
 	const studyBlocks = events.filter((e) => e.type === "study_block");
 
-	// PUC upload simulation
 	const [uploadingStatus, setUploadingStatus] =
 		useState<PUCProcessingStatus | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const handlePUCUpload = useCallback(
 		async (file: File) => {
-			setUploadingStatus("uploading");
-			const doc = await uploadPUC({
-				subjectId: asId<"subjects">(subjectId),
-				fileName: file.name,
-			});
+			try {
+				// 1. Generate upload URL
+				setUploadingStatus("uploading");
+				const uploadUrl = await generateUploadUrl({});
 
-			setTimeout(() => {
+				// 2. Upload file to Convex storage
+				const uploadResponse = await fetch(uploadUrl, {
+					method: "POST",
+					headers: { "Content-Type": file.type },
+					body: file,
+				});
+				if (!uploadResponse.ok) {
+					throw new Error("Failed to upload file");
+				}
+				const { storageId } = await uploadResponse.json();
+
+				// 3. Create PUC document record
+				const doc = await uploadPUC({
+					subjectId: asId<"subjects">(subjectId),
+					fileName: file.name,
+					storageId,
+				});
+
+				// 4. Process PUC with AI (sets status processing → extracted)
 				setUploadingStatus("processing");
-				updatePUCStatus({
-					id: asId<"pucDocuments">(doc.id),
-					status: "processing",
+				await processPuc({
+					pucId: asId<"pucDocuments">(doc.id),
+					locale,
 				});
-			}, 1500);
 
-			setTimeout(() => {
 				setUploadingStatus("extracted");
-				updatePUCStatus({
-					id: asId<"pucDocuments">(doc.id),
-					status: "extracted",
-				});
 				toast.success(t.puc.extracted);
-			}, 4000);
+			} catch {
+				setUploadingStatus("error");
+				toast.error(t.puc.error);
+			}
 		},
-		[subjectId, uploadPUC, updatePUCStatus, t.puc.extracted],
+		[
+			subjectId,
+			generateUploadUrl,
+			uploadPUC,
+			processPuc,
+			locale,
+			t.puc.extracted,
+			t.puc.error,
+		],
 	);
+
+	const handleReprocess = useCallback(async () => {
+		if (!puc) return;
+		try {
+			setUploadingStatus("processing");
+			await processPuc({
+				pucId: asId<"pucDocuments">(puc.id),
+				locale,
+			});
+			setUploadingStatus("extracted");
+			toast.success(t.puc.extracted);
+		} catch {
+			setUploadingStatus("error");
+			toast.error(t.puc.error);
+		}
+	}, [puc, processPuc, locale, t.puc.extracted, t.puc.error]);
+
+	const handleRetry = useCallback(() => {
+		if (puc?.storageId) {
+			handleReprocess();
+		} else {
+			setUploadingStatus(null);
+		}
+	}, [puc, handleReprocess]);
 
 	const handleDelete = async () => {
 		if (!subject) return;
@@ -129,7 +177,14 @@ function SubjectOverviewPage() {
 	}
 
 	const hasPUC = puc?.status === "extracted";
+	const isProcessing =
+		uploadingStatus === "uploading" || uploadingStatus === "processing";
 	const showUploadProgress = uploadingStatus && uploadingStatus !== "extracted";
+	// Also show progress from server-side status (e.g. after page reload during processing)
+	const serverProcessing =
+		!uploadingStatus &&
+		(puc?.status === "uploading" || puc?.status === "processing");
+	const serverError = !uploadingStatus && puc?.status === "error";
 
 	return (
 		<div className="space-y-8">
@@ -175,10 +230,22 @@ function SubjectOverviewPage() {
 			</div>
 
 			{/* PUC status section */}
-			{showUploadProgress ? (
+			{showUploadProgress || serverProcessing ? (
 				<div className="space-y-2">
 					<h3 className="font-display text-lg">{t.subject.pucStatus}</h3>
-					<ExtractionProgress status={uploadingStatus} />
+					<ExtractionProgress
+						status={
+							uploadingStatus ??
+							(puc?.status as PUCProcessingStatus) ??
+							"uploading"
+						}
+						onRetry={uploadingStatus === "error" ? handleRetry : undefined}
+					/>
+				</div>
+			) : serverError ? (
+				<div className="space-y-2">
+					<h3 className="font-display text-lg">{t.subject.pucStatus}</h3>
+					<ExtractionProgress status="error" onRetry={handleRetry} />
 				</div>
 			) : !hasPUC && !isArchived ? (
 				<div className="rounded-xl border border-dashed border-border p-6 text-center space-y-3">
@@ -210,7 +277,7 @@ function SubjectOverviewPage() {
 						{t.puc.upload}
 					</Button>
 				</div>
-			) : (
+			) : hasPUC ? (
 				<div className="rounded-xl border border-success/20 bg-success/5 p-4 flex items-center gap-3">
 					<div className="w-9 h-9 rounded-lg bg-success/15 flex items-center justify-center shrink-0">
 						<FileText className="w-4.5 h-4.5 text-success" />
@@ -227,8 +294,41 @@ function SubjectOverviewPage() {
 					>
 						v{puc?.version}
 					</Badge>
+					{!isArchived && (
+						<Dialog>
+							<DialogTrigger asChild>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="shrink-0"
+									disabled={isProcessing}
+								>
+									<RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+									{t.puc.reprocess}
+								</Button>
+							</DialogTrigger>
+							<DialogContent>
+								<DialogHeader>
+									<DialogTitle>{t.puc.reprocess}</DialogTitle>
+									<DialogDescription>
+										{t.puc.reprocessConfirm}
+									</DialogDescription>
+								</DialogHeader>
+								<DialogFooter>
+									<DialogClose asChild>
+										<Button variant="outline">{t.common.cancel}</Button>
+									</DialogClose>
+									<DialogClose asChild>
+										<Button onClick={handleReprocess}>
+											{t.common.confirm}
+										</Button>
+									</DialogClose>
+								</DialogFooter>
+							</DialogContent>
+						</Dialog>
+					)}
 				</div>
-			)}
+			) : null}
 
 			{/* Upcoming events preview */}
 			{events.length > 0 && (

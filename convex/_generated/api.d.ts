@@ -13,6 +13,7 @@ import type * as dashboard from "../dashboard.js";
 import type * as events from "../events.js";
 import type * as helpers from "../helpers.js";
 import type * as puc from "../puc.js";
+import type * as pucProcessing from "../pucProcessing.js";
 import type * as resources from "../resources.js";
 import type * as seed from "../seed.js";
 import type * as semesters from "../semesters.js";
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   events: typeof events;
   helpers: typeof helpers;
   puc: typeof puc;
+  pucProcessing: typeof pucProcessing;
   resources: typeof resources;
   seed: typeof seed;
   semesters: typeof semesters;
