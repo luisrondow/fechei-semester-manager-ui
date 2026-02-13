@@ -11,6 +11,7 @@
 import type * as briefs from "../briefs.js";
 import type * as dashboard from "../dashboard.js";
 import type * as events from "../events.js";
+import type * as helpers from "../helpers.js";
 import type * as puc from "../puc.js";
 import type * as resources from "../resources.js";
 import type * as seed from "../seed.js";
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   briefs: typeof briefs;
   dashboard: typeof dashboard;
   events: typeof events;
+  helpers: typeof helpers;
   puc: typeof puc;
   resources: typeof resources;
   seed: typeof seed;

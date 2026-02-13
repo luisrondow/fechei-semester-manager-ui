@@ -13,7 +13,9 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SemestersRouteImport } from './routes/semesters'
 import { Route as PucExplainerRouteImport } from './routes/puc-explainer'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ArchiveRouteImport } from './routes/archive'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SemestersIndexRouteImport } from './routes/semesters.index'
 import { Route as SemestersNewRouteImport } from './routes/semesters.new'
 import { Route as SemesterSemesterIdRouteImport } from './routes/semester.$semesterId'
 import { Route as SemesterSemesterIdIndexRouteImport } from './routes/semester.$semesterId.index'
@@ -48,10 +50,20 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArchiveRoute = ArchiveRouteImport.update({
+  id: '/archive',
+  path: '/archive',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SemestersIndexRoute = SemestersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SemestersRoute,
 } as any)
 const SemestersNewRoute = SemestersNewRouteImport.update({
   id: '/new',
@@ -129,12 +141,14 @@ const SemesterSemesterIdSubjectSubjectIdBriefRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/archive': typeof ArchiveRoute
   '/dashboard': typeof DashboardRoute
   '/puc-explainer': typeof PucExplainerRoute
   '/semesters': typeof SemestersRouteWithChildren
   '/settings': typeof SettingsRoute
   '/semester/$semesterId': typeof SemesterSemesterIdRouteWithChildren
   '/semesters/new': typeof SemestersNewRoute
+  '/semesters/': typeof SemestersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/semester/$semesterId/calendar': typeof SemesterSemesterIdCalendarRoute
   '/semester/$semesterId/edit': typeof SemesterSemesterIdEditRoute
@@ -149,11 +163,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/archive': typeof ArchiveRoute
   '/dashboard': typeof DashboardRoute
   '/puc-explainer': typeof PucExplainerRoute
-  '/semesters': typeof SemestersRouteWithChildren
   '/settings': typeof SettingsRoute
   '/semesters/new': typeof SemestersNewRoute
+  '/semesters': typeof SemestersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/semester/$semesterId/calendar': typeof SemesterSemesterIdCalendarRoute
   '/semester/$semesterId/edit': typeof SemesterSemesterIdEditRoute
@@ -168,12 +183,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/archive': typeof ArchiveRoute
   '/dashboard': typeof DashboardRoute
   '/puc-explainer': typeof PucExplainerRoute
   '/semesters': typeof SemestersRouteWithChildren
   '/settings': typeof SettingsRoute
   '/semester/$semesterId': typeof SemesterSemesterIdRouteWithChildren
   '/semesters/new': typeof SemestersNewRoute
+  '/semesters/': typeof SemestersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/semester/$semesterId/calendar': typeof SemesterSemesterIdCalendarRoute
   '/semester/$semesterId/edit': typeof SemesterSemesterIdEditRoute
@@ -190,12 +207,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/archive'
     | '/dashboard'
     | '/puc-explainer'
     | '/semesters'
     | '/settings'
     | '/semester/$semesterId'
     | '/semesters/new'
+    | '/semesters/'
     | '/api/auth/$'
     | '/semester/$semesterId/calendar'
     | '/semester/$semesterId/edit'
@@ -210,11 +229,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/archive'
     | '/dashboard'
     | '/puc-explainer'
-    | '/semesters'
     | '/settings'
     | '/semesters/new'
+    | '/semesters'
     | '/api/auth/$'
     | '/semester/$semesterId/calendar'
     | '/semester/$semesterId/edit'
@@ -228,12 +248,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/archive'
     | '/dashboard'
     | '/puc-explainer'
     | '/semesters'
     | '/settings'
     | '/semester/$semesterId'
     | '/semesters/new'
+    | '/semesters/'
     | '/api/auth/$'
     | '/semester/$semesterId/calendar'
     | '/semester/$semesterId/edit'
@@ -249,6 +271,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArchiveRoute: typeof ArchiveRoute
   DashboardRoute: typeof DashboardRoute
   PucExplainerRoute: typeof PucExplainerRoute
   SemestersRoute: typeof SemestersRouteWithChildren
@@ -287,12 +310,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/archive': {
+      id: '/archive'
+      path: '/archive'
+      fullPath: '/archive'
+      preLoaderRoute: typeof ArchiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/semesters/': {
+      id: '/semesters/'
+      path: '/'
+      fullPath: '/semesters/'
+      preLoaderRoute: typeof SemestersIndexRouteImport
+      parentRoute: typeof SemestersRoute
     }
     '/semesters/new': {
       id: '/semesters/new'
@@ -390,10 +427,12 @@ declare module '@tanstack/react-router' {
 
 interface SemestersRouteChildren {
   SemestersNewRoute: typeof SemestersNewRoute
+  SemestersIndexRoute: typeof SemestersIndexRoute
 }
 
 const SemestersRouteChildren: SemestersRouteChildren = {
   SemestersNewRoute: SemestersNewRoute,
+  SemestersIndexRoute: SemestersIndexRoute,
 }
 
 const SemestersRouteWithChildren = SemestersRoute._addFileChildren(
@@ -448,6 +487,7 @@ const SemesterSemesterIdRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArchiveRoute: ArchiveRoute,
   DashboardRoute: DashboardRoute,
   PucExplainerRoute: PucExplainerRoute,
   SemestersRoute: SemestersRouteWithChildren,

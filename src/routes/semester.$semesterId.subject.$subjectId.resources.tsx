@@ -25,8 +25,10 @@ import {
 	useTogglePin,
 	useUpdateResource,
 } from "@/hooks/queries/use-resources";
+import { useSemester } from "@/hooks/queries/use-semesters";
 import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
+import { isSemesterArchived } from "@/lib/semester-utils";
 import type { Resource } from "@/lib/types";
 
 export const Route = createFileRoute(
@@ -36,8 +38,10 @@ export const Route = createFileRoute(
 });
 
 function ResourcesPage() {
-	const { subjectId } = Route.useParams();
+	const { semesterId, subjectId } = Route.useParams();
 	const { t } = useI18n();
+	const { data: semester } = useSemester(semesterId);
+	const isArchived = semester ? isSemesterArchived(semester) : false;
 
 	const { data: resources = [], isLoading } = useResourcesBySubject(subjectId);
 	const createResource = useCreateResource(subjectId);
@@ -50,33 +54,19 @@ function ResourcesPage() {
 	const [deleteId, setDeleteId] = useState<string | null>(null);
 
 	const handleTogglePin = useCallback(
-		(id: string) => {
+		async (id: string) => {
 			const resource = resources.find((r) => r.id === id);
-			togglePin.mutate(
-				{ id: asId<"resources">(id) },
-				{
-					onSuccess: () => {
-						toast.success(
-							resource?.pinned ? t.resource.unpinned : t.resource.pinned,
-						);
-					},
-				},
-			);
+			await togglePin({ id: asId<"resources">(id) });
+			toast.success(resource?.pinned ? t.resource.unpinned : t.resource.pinned);
 		},
 		[togglePin, resources, t.resource.pinned, t.resource.unpinned],
 	);
 
 	const handleDelete = useCallback(
-		(id: string) => {
-			deleteResource.mutate(
-				{ id: asId<"resources">(id) },
-				{
-					onSuccess: () => {
-						toast.success(t.resource.deleted);
-						setDeleteId(null);
-					},
-				},
-			);
+		async (id: string) => {
+			await deleteResource({ id: asId<"resources">(id) });
+			toast.success(t.resource.deleted);
+			setDeleteId(null);
 		},
 		[deleteResource, t.resource.deleted],
 	);
@@ -87,6 +77,14 @@ function ResourcesPage() {
 				{[1, 2, 3].map((i) => (
 					<Skeleton key={i} className="h-24 rounded-xl" />
 				))}
+			</div>
+		);
+	}
+
+	if (isArchived) {
+		return (
+			<div className="space-y-4">
+				<ResourceList resources={resources} readOnly />
 			</div>
 		);
 	}
@@ -106,7 +104,7 @@ function ResourcesPage() {
 						<ResourceForm
 							subjectId={subjectId}
 							onSave={async (data) => {
-								await createResource.mutateAsync({
+								await createResource({
 									...data,
 									subjectId: asId<"subjects">(data.subjectId),
 								});
@@ -140,7 +138,7 @@ function ResourcesPage() {
 							subjectId={subjectId}
 							resource={editingResource}
 							onSave={async (data) => {
-								await updateResource.mutateAsync({
+								await updateResource({
 									id: asId<"resources">(editingResource.id),
 									title: data.title,
 									url: data.url,

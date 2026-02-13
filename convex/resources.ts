@@ -1,5 +1,10 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import {
+	assertNotArchived,
+	getSemesterIdForResource,
+	getSemesterIdForSubject,
+} from "./helpers";
 
 export const listBySubject = query({
 	args: { subjectId: v.string() },
@@ -36,6 +41,8 @@ export const create = mutation({
 		tags: v.optional(v.array(v.string())),
 	},
 	handler: async (ctx, args) => {
+		const semesterId = await getSemesterIdForSubject(ctx, args.subjectId);
+		await assertNotArchived(ctx, semesterId);
 		const id = await ctx.db.insert("resources", {
 			subjectId: args.subjectId,
 			sourceType: "user_saved",
@@ -74,6 +81,8 @@ export const update = mutation({
 		tags: v.optional(v.array(v.string())),
 	},
 	handler: async (ctx, args) => {
+		const semesterId = await getSemesterIdForResource(ctx, args.id);
+		await assertNotArchived(ctx, semesterId);
 		const { id, ...fields } = args;
 		const updates: Record<string, unknown> = {
 			updatedAt: new Date().toISOString(),
@@ -104,6 +113,8 @@ export const update = mutation({
 export const remove = mutation({
 	args: { id: v.id("resources") },
 	handler: async (ctx, args) => {
+		const semesterId = await getSemesterIdForResource(ctx, args.id);
+		await assertNotArchived(ctx, semesterId);
 		await ctx.db.delete(args.id);
 	},
 });
@@ -111,6 +122,8 @@ export const remove = mutation({
 export const togglePin = mutation({
 	args: { id: v.id("resources") },
 	handler: async (ctx, args) => {
+		const semesterId = await getSemesterIdForResource(ctx, args.id);
+		await assertNotArchived(ctx, semesterId);
 		const r = await ctx.db.get(args.id);
 		if (!r) throw new Error("Resource not found");
 		await ctx.db.patch(args.id, {

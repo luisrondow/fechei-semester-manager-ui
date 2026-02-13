@@ -78,6 +78,7 @@ src/components + routes     → React UI consuming hooks
 | `puc.ts` | PUC docs (getBySubject, generateUploadUrl, upload, updateStatus) |
 | `dashboard.ts` | Aggregation query (subjects + pinned resources for dashboard) |
 | `seed.ts` | Seed mutation for demo data |
+| `helpers.ts` | Archive guards (`assertNotArchived`) + entity→semester resolvers |
 
 All Convex queries map `_id` → `id` and `_creationTime` → `createdAt` to match `src/lib/types.ts` interfaces.
 
@@ -104,13 +105,14 @@ All core entities in `src/lib/types.ts`: Semester, Subject, PUCDocument, Subject
 ```
 /                                                → Redirect to /dashboard
 /dashboard                                       → Aggregated overview (deadlines, this week, pinned)
-/semesters                                       → Semester list
+/semesters                                       → Semester list (active + upcoming only)
 /semesters/new                                   → Create semester form
+/archive                                         → Archived semesters (read-only)
 /semester/:id                                    → Semester detail (subjects grid, stats)
-/semester/:id/edit                               → Edit semester form
+/semester/:id/edit                               → Edit semester form (redirects if archived)
 /semester/:id/calendar                           → Month calendar view
 /semester/:id/export                             → .ics export (full / due-dates-only)
-/semester/:id/subjects/new                       → Add subject + PUC upload
+/semester/:id/subjects/new                       → Add subject + PUC upload (redirects if archived)
 /semester/:id/subject/:subId                     → Subject overview (tabbed layout)
 /semester/:id/subject/:subId/review              → Review PUC extraction
 /semester/:id/subject/:subId/brief               → AI subject brief (view/edit)
@@ -132,13 +134,24 @@ Locale stored in localStorage, detected from browser language on first visit. `<
 - React Compiler enabled via Babel plugin
 - TypeScript strict mode enabled
 
+### Archive & Current Semester
+- **Archive status** is computed from `endDate < today` — no schema changes, no stored flag
+- `src/lib/semester-utils.ts` exports `isSemesterArchived()`, `getSemesterStatus()`, `getActiveSemester()`, `dateStr()`
+- `getActiveSemester()` returns `{ semester, hasOverlap }` — picks latest `startDate` when multiple semesters overlap
+- Dashboard shows overlap warning or "no current semester" empty state
+- `/semesters` filters out archived; `/archive` shows only archived
+- Archived semesters are read-only: edit/delete/add/confirm buttons hidden, edit/create routes redirect
+- `convex/helpers.ts` has `assertNotArchived()` guard called at the start of every mutation
+- Components accept `readOnly` prop for archive mode: `BriefEditor`, `ResourceList`, `ResourceItem`, `EventReviewCard`
+
 ### Implementation Status
-All MVP features are implemented (Phases 0-6 complete) + Convex backend migration:
+All MVP features are implemented (Phases 0-6 complete) + Convex backend migration + Feature A (archive):
 - Semester CRUD, Subject management, PUC upload/extraction
 - Calendar events (view/edit/confirm), month calendar view
 - Subject briefs (AI-generated, editable), Resources (CRUD, pin/sort)
 - Dashboard with aggregated data, .ics export, Settings, full EN/PT-PT i18n
 - Real-time data via Convex (queries auto-update across tabs)
+- Current semester detection (date-based), archive system with read-only enforcement
 
 ### Auth (Deferred)
 Auth is configured (Better Auth) but not wired into Convex. All queries use hardcoded `userId: "user-1"`. Auth integration is a follow-up task.

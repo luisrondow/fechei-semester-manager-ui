@@ -1,5 +1,6 @@
 import { Link, useMatches } from "@tanstack/react-router";
 import {
+	Archive,
 	BookOpen,
 	GraduationCap,
 	LayoutDashboard,
@@ -41,6 +42,12 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
 			icon: GraduationCap,
 			match: (path: string) =>
 				path.startsWith("/semester") || path === "/semesters",
+		},
+		{
+			to: "/archive" as const,
+			label: t.nav.archive,
+			icon: Archive,
+			match: (path: string) => path === "/archive",
 		},
 	];
 

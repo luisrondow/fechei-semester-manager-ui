@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { assertNotArchived } from "./helpers";
 
 export const list = query({
 	args: {},
@@ -110,6 +111,7 @@ export const update = mutation({
 		timezone: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
+		await assertNotArchived(ctx, args.id);
 		const { id, ...fields } = args;
 		const updates: Record<string, string> = {
 			updatedAt: new Date().toISOString(),
@@ -136,6 +138,7 @@ export const update = mutation({
 export const remove = mutation({
 	args: { id: v.id("semesters") },
 	handler: async (ctx, args) => {
+		await assertNotArchived(ctx, args.id);
 		// Cascade delete: subjects → events, briefs, resources, PUC docs → semester
 		const subjects = await ctx.db
 			.query("subjects")

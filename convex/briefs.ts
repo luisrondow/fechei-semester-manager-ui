@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { assertNotArchived, getSemesterIdForBrief } from "./helpers";
 
 export const getBySubject = query({
 	args: { subjectId: v.string() },
@@ -27,6 +28,8 @@ export const update = mutation({
 		userEditedText: v.optional(v.union(v.string(), v.null())),
 	},
 	handler: async (ctx, args) => {
+		const semesterId = await getSemesterIdForBrief(ctx, args.id);
+		await assertNotArchived(ctx, semesterId);
 		const patch: Record<string, unknown> = {};
 		if (args.userEditedText === null) {
 			// Reset to generated text — remove user edit

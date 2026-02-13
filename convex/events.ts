@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { assertNotArchived, getSemesterIdForEvent } from "./helpers";
 
 export const listBySemester = query({
 	args: { semesterId: v.string() },
@@ -71,6 +72,8 @@ export const update = mutation({
 		status: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
+		const semesterId = await getSemesterIdForEvent(ctx, args.id);
+		await assertNotArchived(ctx, semesterId);
 		const { id, ...fields } = args;
 		const updates: Record<string, string> = {
 			updatedAt: new Date().toISOString(),
@@ -102,6 +105,8 @@ export const update = mutation({
 export const confirm = mutation({
 	args: { id: v.id("calendarEvents") },
 	handler: async (ctx, args) => {
+		const semesterId = await getSemesterIdForEvent(ctx, args.id);
+		await assertNotArchived(ctx, semesterId);
 		await ctx.db.patch(args.id, {
 			status: "confirmed",
 			updatedAt: new Date().toISOString(),

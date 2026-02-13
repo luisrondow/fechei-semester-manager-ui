@@ -1,5 +1,10 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import {
+	assertNotArchived,
+	getSemesterIdForPuc,
+	getSemesterIdForSubject,
+} from "./helpers";
 
 export const getBySubject = query({
 	args: { subjectId: v.string() },
@@ -38,6 +43,8 @@ export const upload = mutation({
 		storageId: v.optional(v.id("_storage")),
 	},
 	handler: async (ctx, args) => {
+		const semesterId = await getSemesterIdForSubject(ctx, args.subjectId);
+		await assertNotArchived(ctx, semesterId);
 		const id = await ctx.db.insert("pucDocuments", {
 			subjectId: args.subjectId,
 			fileName: args.fileName,
@@ -66,6 +73,8 @@ export const updateStatus = mutation({
 		status: v.string(),
 	},
 	handler: async (ctx, args) => {
+		const semesterId = await getSemesterIdForPuc(ctx, args.id);
+		await assertNotArchived(ctx, semesterId);
 		await ctx.db.patch(args.id, { status: args.status });
 	},
 });

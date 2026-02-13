@@ -36,6 +36,7 @@ import { useDeleteSemester, useSemester } from "@/hooks/queries/use-semesters";
 import { useSubjectsBySemesterWithPuc } from "@/hooks/queries/use-subjects";
 import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
+import { isSemesterArchived } from "@/lib/semester-utils";
 
 export const Route = createFileRoute("/semester/$semesterId/")({
 	component: SemesterDetailPage,
@@ -79,8 +80,10 @@ function SemesterDetailPage() {
 		);
 	}
 
+	const isArchived = isSemesterArchived(semester);
+
 	const handleDelete = async () => {
-		await deleteSemester.mutateAsync({ id: asId<"semesters">(semester.id) });
+		await deleteSemester({ id: asId<"semesters">(semester.id) });
 		toast.success(t.semester.delete);
 		navigate({ to: "/semesters" });
 	};
@@ -125,60 +128,64 @@ function SemesterDetailPage() {
 								{t.semester.export}
 							</Link>
 						</Button>
-						<Button variant="outline" size="sm" asChild>
-							<Link
-								to="/semester/$semesterId/edit"
-								params={{ semesterId: semester.id }}
-							>
-								<Pencil className="w-3.5 h-3.5 mr-1.5" />
-								{t.common.edit}
-							</Link>
-						</Button>
+						{!isArchived && (
+							<>
+								<Button variant="outline" size="sm" asChild>
+									<Link
+										to="/semester/$semesterId/edit"
+										params={{ semesterId: semester.id }}
+									>
+										<Pencil className="w-3.5 h-3.5 mr-1.5" />
+										{t.common.edit}
+									</Link>
+								</Button>
 
-						<Dialog>
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button variant="ghost" size="icon" className="h-8 w-8">
-										<MoreHorizontal className="w-4 h-4" />
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end">
-									<DropdownMenuItem asChild>
-										<Link
-											to="/semester/$semesterId/edit"
-											params={{ semesterId: semester.id }}
-										>
-											<Pencil className="w-4 h-4 mr-2" />
-											{t.semester.edit}
-										</Link>
-									</DropdownMenuItem>
-									<DropdownMenuSeparator />
-									<DialogTrigger asChild>
-										<DropdownMenuItem className="text-destructive-foreground">
-											<Trash2 className="w-4 h-4 mr-2" />
-											{t.semester.delete}
-										</DropdownMenuItem>
-									</DialogTrigger>
-								</DropdownMenuContent>
-							</DropdownMenu>
+								<Dialog>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button variant="ghost" size="icon" className="h-8 w-8">
+												<MoreHorizontal className="w-4 h-4" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuItem asChild>
+												<Link
+													to="/semester/$semesterId/edit"
+													params={{ semesterId: semester.id }}
+												>
+													<Pencil className="w-4 h-4 mr-2" />
+													{t.semester.edit}
+												</Link>
+											</DropdownMenuItem>
+											<DropdownMenuSeparator />
+											<DialogTrigger asChild>
+												<DropdownMenuItem className="text-destructive-foreground">
+													<Trash2 className="w-4 h-4 mr-2" />
+													{t.semester.delete}
+												</DropdownMenuItem>
+											</DialogTrigger>
+										</DropdownMenuContent>
+									</DropdownMenu>
 
-							<DialogContent>
-								<DialogHeader>
-									<DialogTitle>{t.semester.delete}</DialogTitle>
-									<DialogDescription>
-										{t.semester.deleteConfirm}
-									</DialogDescription>
-								</DialogHeader>
-								<DialogFooter>
-									<DialogClose asChild>
-										<Button variant="outline">{t.common.cancel}</Button>
-									</DialogClose>
-									<Button variant="destructive" onClick={handleDelete}>
-										{t.common.delete}
-									</Button>
-								</DialogFooter>
-							</DialogContent>
-						</Dialog>
+									<DialogContent>
+										<DialogHeader>
+											<DialogTitle>{t.semester.delete}</DialogTitle>
+											<DialogDescription>
+												{t.semester.deleteConfirm}
+											</DialogDescription>
+										</DialogHeader>
+										<DialogFooter>
+											<DialogClose asChild>
+												<Button variant="outline">{t.common.cancel}</Button>
+											</DialogClose>
+											<Button variant="destructive" onClick={handleDelete}>
+												{t.common.delete}
+											</Button>
+										</DialogFooter>
+									</DialogContent>
+								</Dialog>
+							</>
+						)}
 					</div>
 				}
 			/>
@@ -218,28 +225,33 @@ function SemesterDetailPage() {
 			<div>
 				<div className="flex items-center justify-between mb-4">
 					<h2 className="font-display text-xl">{t.subject.title}</h2>
-					<Button size="sm" variant="outline" asChild>
-						<Link
-							to="/semester/$semesterId/subjects/new"
-							params={{ semesterId: semester.id }}
-						>
-							<Plus className="w-4 h-4 mr-1.5" />
-							{t.subject.add}
-						</Link>
-					</Button>
+					{!isArchived && (
+						<Button size="sm" variant="outline" asChild>
+							<Link
+								to="/semester/$semesterId/subjects/new"
+								params={{ semesterId: semester.id }}
+							>
+								<Plus className="w-4 h-4 mr-1.5" />
+								{t.subject.add}
+							</Link>
+						</Button>
+					)}
 				</div>
 
 				{subjects.length === 0 ? (
 					<EmptyState
 						icon={GraduationCap}
 						title={t.semester.noSubjects}
-						description={t.subject.add}
-						actionLabel={t.subject.add}
-						onAction={() =>
-							navigate({
-								to: "/semester/$semesterId/subjects/new",
-								params: { semesterId: semester.id },
-							})
+						description={isArchived ? undefined : t.subject.add}
+						actionLabel={isArchived ? undefined : t.subject.add}
+						onAction={
+							isArchived
+								? undefined
+								: () =>
+										navigate({
+											to: "/semester/$semesterId/subjects/new",
+											params: { semesterId: semester.id },
+										})
 						}
 					/>
 				) : (

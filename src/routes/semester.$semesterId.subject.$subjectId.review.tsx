@@ -18,8 +18,10 @@ import {
 	useEventsBySubject,
 } from "@/hooks/queries/use-events";
 import { usePUC } from "@/hooks/queries/use-puc";
+import { useSemester } from "@/hooks/queries/use-semesters";
 import { asId } from "@/lib/convex-helpers";
 import { useI18n } from "@/lib/i18n";
+import { isSemesterArchived } from "@/lib/semester-utils";
 import type { CalendarEvent } from "@/lib/types";
 
 export const Route = createFileRoute(
@@ -31,6 +33,8 @@ export const Route = createFileRoute(
 function ReviewPage() {
 	const { semesterId, subjectId } = Route.useParams();
 	const { t } = useI18n();
+	const { data: semester } = useSemester(semesterId);
+	const isArchived = semester ? isSemesterArchived(semester) : false;
 
 	const { data: puc, isLoading: pucLoading } = usePUC(subjectId);
 	const { data: events = [], isLoading: evtLoading } =
@@ -89,6 +93,7 @@ function ReviewPage() {
 						event={event}
 						subjectId={subjectId}
 						semesterId={semesterId}
+						readOnly={isArchived}
 					/>
 				))}
 			</div>
@@ -100,21 +105,19 @@ function EventReviewCard({
 	event,
 	subjectId,
 	semesterId,
+	readOnly,
 }: {
 	event: CalendarEvent;
 	subjectId: string;
 	semesterId: string;
+	readOnly: boolean;
 }) {
 	const { t } = useI18n();
 	const confirmEvent = useConfirmEvent(subjectId, semesterId);
 
-	const handleConfirm = () => {
-		confirmEvent.mutate(
-			{ id: asId<"calendarEvents">(event.id) },
-			{
-				onSuccess: () => toast.success(t.event.confirmed),
-			},
-		);
+	const handleConfirm = async () => {
+		await confirmEvent({ id: asId<"calendarEvents">(event.id) });
+		toast.success(t.event.confirmed);
 	};
 
 	const typeConfig = {
@@ -194,7 +197,7 @@ function EventReviewCard({
 					</div>
 				</div>
 
-				{event.status === "pending" && (
+				{event.status === "pending" && !readOnly && (
 					<Button
 						variant="outline"
 						size="sm"

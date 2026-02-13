@@ -228,6 +228,47 @@ export const seedData = mutation({
 			updatedAt: "2024-09-16T11:30:00Z",
 		});
 
+		// Second semester (current/active)
+		const sem2Id = await ctx.db.insert("semesters", {
+			userId: "user-1",
+			name: "2025/26 - 1.\u00ba Semestre",
+			startDate: "2025-10-05",
+			endDate: "2026-02-14",
+			timezone: "Europe/Lisbon",
+			updatedAt: "2025-09-15T10:00:00Z",
+		});
+
+		const sub3 = await ctx.db.insert("subjects", {
+			semesterId: sem2Id,
+			name: "Programa\u00e7\u00e3o I",
+			code: "21094",
+			instructor: "Prof. Ana Costa",
+		});
+
+		await ctx.db.insert("calendarEvents", {
+			subjectId: sub3,
+			type: "study_block",
+			startDate: "2025-10-05",
+			endDate: "2025-11-01",
+			title: "Tema 1: Introdu\u00e7\u00e3o \u00e0 Programa\u00e7\u00e3o",
+			description: "Conceitos b\u00e1sicos, vari\u00e1veis e tipos de dados.",
+			status: "confirmed",
+			sourceExcerpt: "Tema 1 \u2014 05 de outubro a 01 de novembro",
+			updatedAt: "2025-09-16T10:30:00Z",
+		});
+
+		await ctx.db.insert("calendarEvents", {
+			subjectId: sub3,
+			type: "assessment",
+			startDate: "2026-01-15",
+			endDate: "2026-01-25",
+			title: "E-f\u00f3lio A",
+			description: "Avalia\u00e7\u00e3o cont\u00ednua \u2014 Temas 1-3",
+			status: "pending",
+			sourceExcerpt: "E-f\u00f3lio A: 15 a 25 de janeiro",
+			updatedAt: "2025-09-16T10:30:00Z",
+		});
+
 		// Resources
 		await ctx.db.insert("resources", {
 			subjectId: sub1,
