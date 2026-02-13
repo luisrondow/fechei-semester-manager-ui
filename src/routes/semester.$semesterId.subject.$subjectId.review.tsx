@@ -115,13 +115,9 @@ function EventReviewCard({
 	const { t } = useI18n();
 	const confirmEvent = useConfirmEvent(subjectId, semesterId);
 
-	const handleConfirm = () => {
-		confirmEvent.mutate(
-			{ id: asId<"calendarEvents">(event.id) },
-			{
-				onSuccess: () => toast.success(t.event.confirmed),
-			},
-		);
+	const handleConfirm = async () => {
+		await confirmEvent({ id: asId<"calendarEvents">(event.id) });
+		toast.success(t.event.confirmed);
 	};
 
 	const typeConfig = {

@@ -80,7 +80,7 @@ function EditForm({
 			}),
 		},
 		onSubmit: async ({ value }) => {
-			await updateSemester.mutateAsync({
+			await updateSemester({
 				id: asId<"semesters">(semester.id),
 				...value,
 			});
@@ -153,7 +153,7 @@ function EditForm({
 
 				<div className="flex gap-3 pt-4">
 					<form.AppForm>
-						{(form) => <form.SubscribeButton label={t.common.save} />}
+						<form.SubscribeButton label={t.common.save} />
 					</form.AppForm>
 					<Button
 						type="button"

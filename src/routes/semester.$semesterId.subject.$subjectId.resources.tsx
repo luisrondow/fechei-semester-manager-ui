@@ -54,33 +54,19 @@ function ResourcesPage() {
 	const [deleteId, setDeleteId] = useState<string | null>(null);
 
 	const handleTogglePin = useCallback(
-		(id: string) => {
+		async (id: string) => {
 			const resource = resources.find((r) => r.id === id);
-			togglePin.mutate(
-				{ id: asId<"resources">(id) },
-				{
-					onSuccess: () => {
-						toast.success(
-							resource?.pinned ? t.resource.unpinned : t.resource.pinned,
-						);
-					},
-				},
-			);
+			await togglePin({ id: asId<"resources">(id) });
+			toast.success(resource?.pinned ? t.resource.unpinned : t.resource.pinned);
 		},
 		[togglePin, resources, t.resource.pinned, t.resource.unpinned],
 	);
 
 	const handleDelete = useCallback(
-		(id: string) => {
-			deleteResource.mutate(
-				{ id: asId<"resources">(id) },
-				{
-					onSuccess: () => {
-						toast.success(t.resource.deleted);
-						setDeleteId(null);
-					},
-				},
-			);
+		async (id: string) => {
+			await deleteResource({ id: asId<"resources">(id) });
+			toast.success(t.resource.deleted);
+			setDeleteId(null);
 		},
 		[deleteResource, t.resource.deleted],
 	);
@@ -118,7 +104,7 @@ function ResourcesPage() {
 						<ResourceForm
 							subjectId={subjectId}
 							onSave={async (data) => {
-								await createResource.mutateAsync({
+								await createResource({
 									...data,
 									subjectId: asId<"subjects">(data.subjectId),
 								});
@@ -152,7 +138,7 @@ function ResourcesPage() {
 							subjectId={subjectId}
 							resource={editingResource}
 							onSave={async (data) => {
-								await updateResource.mutateAsync({
+								await updateResource({
 									id: asId<"resources">(editingResource.id),
 									title: data.title,
 									url: data.url,

@@ -33,7 +33,7 @@ function NewSemesterPage() {
 			}),
 		},
 		onSubmit: async ({ value }) => {
-			await createSemester.mutateAsync(value);
+			await createSemester(value);
 			toast.success(t.semester.create);
 			navigate({ to: "/semesters" });
 		},
@@ -95,7 +95,7 @@ function NewSemesterPage() {
 
 				<div className="flex gap-3 pt-4">
 					<form.AppForm>
-						{(form) => <form.SubscribeButton label={t.common.create} />}
+						<form.SubscribeButton label={t.common.create} />
 					</form.AppForm>
 					<Button
 						type="button"

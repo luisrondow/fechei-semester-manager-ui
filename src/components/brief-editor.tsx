@@ -27,7 +27,7 @@ export function BriefEditor({ brief, subjectId, readOnly }: BriefEditorProps) {
 	const [editText, setEditText] = useState(displayText);
 
 	const handleSave = useCallback(async () => {
-		await updateBrief.mutateAsync({
+		await updateBrief({
 			id: asId<"subjectBriefs">(brief.id),
 			userEditedText: editText,
 		});
@@ -36,7 +36,7 @@ export function BriefEditor({ brief, subjectId, readOnly }: BriefEditorProps) {
 	}, [brief.id, editText, updateBrief, t.brief.saved]);
 
 	const handleReset = useCallback(async () => {
-		await updateBrief.mutateAsync({
+		await updateBrief({
 			id: asId<"subjectBriefs">(brief.id),
 			userEditedText: null,
 		});

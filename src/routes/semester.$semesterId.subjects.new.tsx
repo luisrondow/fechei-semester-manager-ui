@@ -47,7 +47,7 @@ function NewSubjectPage() {
 			}),
 		},
 		onSubmit: async ({ value }) => {
-			const subject = await createSubject.mutateAsync({
+			const subject = await createSubject({
 				semesterId: asId<"semesters">(semesterId),
 				...value,
 			});

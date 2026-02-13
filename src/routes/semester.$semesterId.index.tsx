@@ -83,7 +83,7 @@ function SemesterDetailPage() {
 	const isArchived = isSemesterArchived(semester);
 
 	const handleDelete = async () => {
-		await deleteSemester.mutateAsync({ id: asId<"semesters">(semester.id) });
+		await deleteSemester({ id: asId<"semesters">(semester.id) });
 		toast.success(t.semester.delete);
 		navigate({ to: "/semesters" });
 	};

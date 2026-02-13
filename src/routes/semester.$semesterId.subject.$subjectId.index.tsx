@@ -71,14 +71,14 @@ function SubjectOverviewPage() {
 	const handlePUCUpload = useCallback(
 		async (file: File) => {
 			setUploadingStatus("uploading");
-			const doc = await uploadPUC.mutateAsync({
+			const doc = await uploadPUC({
 				subjectId: asId<"subjects">(subjectId),
 				fileName: file.name,
 			});
 
 			setTimeout(() => {
 				setUploadingStatus("processing");
-				updatePUCStatus.mutate({
+				updatePUCStatus({
 					id: asId<"pucDocuments">(doc.id),
 					status: "processing",
 				});
@@ -86,7 +86,7 @@ function SubjectOverviewPage() {
 
 			setTimeout(() => {
 				setUploadingStatus("extracted");
-				updatePUCStatus.mutate({
+				updatePUCStatus({
 					id: asId<"pucDocuments">(doc.id),
 					status: "extracted",
 				});
@@ -98,7 +98,7 @@ function SubjectOverviewPage() {
 
 	const handleDelete = async () => {
 		if (!subject) return;
-		await deleteSubject.mutateAsync({ id: asId<"subjects">(subject.id) });
+		await deleteSubject({ id: asId<"subjects">(subject.id) });
 		toast.success(t.subject.deleted);
 		navigate({
 			to: "/semester/$semesterId",
