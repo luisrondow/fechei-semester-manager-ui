@@ -38,6 +38,7 @@ export interface PUCDocument {
 	language: Locale;
 	status: PUCProcessingStatus;
 	version: number;
+	storageId: string | null;
 	uploadedAt: string;
 }
 

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { assertNotArchived, getSemesterIdForBrief } from "./helpers";
 
 export const getBySubject = query({
@@ -46,5 +46,33 @@ export const update = mutation({
 			userEditedText: b!.userEditedText ?? null,
 			confidenceScore: b!.confidenceScore,
 		};
+	},
+});
+
+export const create = internalMutation({
+	args: {
+		subjectId: v.id("subjects"),
+		generatedText: v.string(),
+		confidenceScore: v.number(),
+	},
+	handler: async (ctx, args) => {
+		await ctx.db.insert("subjectBriefs", {
+			subjectId: args.subjectId,
+			generatedText: args.generatedText,
+			confidenceScore: args.confidenceScore,
+		});
+	},
+});
+
+export const deleteBySubject = internalMutation({
+	args: { subjectId: v.id("subjects") },
+	handler: async (ctx, args) => {
+		const briefs = await ctx.db
+			.query("subjectBriefs")
+			.withIndex("by_subject", (q) => q.eq("subjectId", args.subjectId))
+			.collect();
+		for (const b of briefs) {
+			await ctx.db.delete(b._id);
+		}
 	},
 });

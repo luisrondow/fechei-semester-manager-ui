@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { assertNotArchived, getSemesterIdForEvent } from "./helpers";
 
 export const listBySemester = query({
@@ -111,5 +111,50 @@ export const confirm = mutation({
 			status: "confirmed",
 			updatedAt: new Date().toISOString(),
 		});
+	},
+});
+
+export const createBatch = internalMutation({
+	args: {
+		events: v.array(
+			v.object({
+				subjectId: v.id("subjects"),
+				type: v.string(),
+				startDate: v.string(),
+				endDate: v.string(),
+				title: v.string(),
+				description: v.string(),
+				sourceExcerpt: v.optional(v.string()),
+			}),
+		),
+	},
+	handler: async (ctx, args) => {
+		const now = new Date().toISOString();
+		for (const event of args.events) {
+			await ctx.db.insert("calendarEvents", {
+				subjectId: event.subjectId,
+				type: event.type,
+				startDate: event.startDate,
+				endDate: event.endDate,
+				title: event.title,
+				description: event.description,
+				status: "pending",
+				sourceExcerpt: event.sourceExcerpt,
+				updatedAt: now,
+			});
+		}
+	},
+});
+
+export const deleteBySubject = internalMutation({
+	args: { subjectId: v.id("subjects") },
+	handler: async (ctx, args) => {
+		const events = await ctx.db
+			.query("calendarEvents")
+			.withIndex("by_subject", (q) => q.eq("subjectId", args.subjectId))
+			.collect();
+		for (const e of events) {
+			await ctx.db.delete(e._id);
+		}
 	},
 });

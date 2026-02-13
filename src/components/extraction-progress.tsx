@@ -1,10 +1,12 @@
-import { Check, FileSearch, Loader2, Upload } from "lucide-react";
+import { Check, FileSearch, Loader2, RefreshCw, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useI18n } from "@/lib/i18n";
 import type { PUCProcessingStatus } from "@/lib/types";
 
 interface ExtractionProgressProps {
 	status: PUCProcessingStatus;
+	onRetry?: () => void;
 }
 
 const steps: Array<{
@@ -24,7 +26,10 @@ const statusOrder: Record<PUCProcessingStatus, number> = {
 	error: -1,
 };
 
-export function ExtractionProgress({ status }: ExtractionProgressProps) {
+export function ExtractionProgress({
+	status,
+	onRetry,
+}: ExtractionProgressProps) {
 	const { t } = useI18n();
 	const currentIndex = statusOrder[status];
 	const progressValue =
@@ -43,6 +48,17 @@ export function ExtractionProgress({ status }: ExtractionProgressProps) {
 					{t.puc.error}
 				</p>
 				<p className="text-xs text-muted-foreground mt-1">{t.puc.errorRetry}</p>
+				{onRetry && (
+					<Button
+						variant="outline"
+						size="sm"
+						className="mt-3"
+						onClick={onRetry}
+					>
+						<RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+						{t.puc.errorRetryButton}
+					</Button>
+				)}
 			</div>
 		);
 	}

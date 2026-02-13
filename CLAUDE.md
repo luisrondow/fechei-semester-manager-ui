@@ -44,6 +44,8 @@ pnpm dlx shadcn@latest add <component>
 - **i18n**: Custom lightweight system (2 locales: EN/PT-PT, ~300 keys, full type safety)
 - **Deployment**: Cloudflare Workers via Wrangler
 - **Calendar Export**: Client-side RFC 5545 .ics generation (full or due-dates-only)
+- **AI Processing**: Vercel AI SDK v6 (`ai` + `@ai-sdk/openai`) with GPT-4o-mini for PUC extraction
+- **PDF Parsing**: `pdf-parse` v1 (Node.js, used inside Convex `"use node"` action)
 
 ### Key Directories
 - `convex/` - Convex backend functions (schema, queries, mutations, seed data)
@@ -72,10 +74,12 @@ src/components + routes     → React UI consuming hooks
 | `schema.ts` | Table definitions with indexes |
 | `semesters.ts` | Semester CRUD (list, get, listWithSubjects, create, update, remove) |
 | `subjects.ts` | Subject CRUD (listBySemester, listBySemesterWithPuc, get, create, remove) |
-| `events.ts` | Calendar events (listBySemester, listBySubject, update, confirm) |
-| `briefs.ts` | Subject briefs (getBySubject, update) |
-| `resources.ts` | Resources (listBySubject, create, update, remove, togglePin) |
-| `puc.ts` | PUC docs (getBySubject, generateUploadUrl, upload, updateStatus) |
+| `events.ts` | Calendar events (listBySemester, listBySubject, update, confirm) + internal `createBatch`, `deleteBySubject` |
+| `briefs.ts` | Subject briefs (getBySubject, update) + internal `create`, `deleteBySubject` |
+| `resources.ts` | Resources (listBySubject, create, update, remove, togglePin) + internal `createFromExtraction`, `deleteExtractedBySubject` |
+| `puc.ts` | PUC docs (getBySubject, generateUploadUrl, upload, updateStatus) + internal `saveExtractedText`, `updateStatusInternal`, `getPucWithContext` |
+| `pucProcessing.ts` | `"use node"` action: PDF extraction + AI structured output → batch insert events/brief/resources |
+| `pdf-parse.d.ts` | Type declaration for `pdf-parse/lib/pdf-parse.js` internal import |
 | `dashboard.ts` | Aggregation query (subjects + pinned resources for dashboard) |
 | `seed.ts` | Seed mutation for demo data |
 | `helpers.ts` | Archive guards (`assertNotArchived`) + entity→semester resolvers |
@@ -144,9 +148,22 @@ Locale stored in localStorage, detected from browser language on first visit. `<
 - `convex/helpers.ts` has `assertNotArchived()` guard called at the start of every mutation
 - Components accept `readOnly` prop for archive mode: `BriefEditor`, `ResourceList`, `ResourceItem`, `EventReviewCard`
 
+### PUC Processing (AI Pipeline)
+- **Action**: `convex/pucProcessing.ts` — `"use node"` action orchestrating the full pipeline
+- **Flow**: Upload PDF → Convex storage → `pdf-parse` text extraction → GPT-4o-mini structured output → batch insert events/brief/resources
+- **AI SDK v6**: Uses `generateText` + `Output.object({ schema })` (NOT deprecated `generateObject`)
+- **Zod schema constraints**: OpenAI structured output requires all fields to be required — use `.nullable()` instead of `.optional()` for optional AI output fields
+- **pdf-parse v1**: Must import `pdf-parse/lib/pdf-parse.js` directly (not the main entry) — `index.js` has a debug block that tries to load a test PDF at module init, which fails in Convex's bundler
+- **Convex `"use node"` limitation**: Only actions can be defined in `"use node"` files — queries/mutations must live in separate files
+- **Re-processing**: Subject overview has a "Re-process" button that deletes old AI-extracted data and re-runs the pipeline
+- **Error handling**: On failure, PUC status is set to `"error"` with retry button in the UI
+- **Locale-aware**: Brief and event titles generated in user's current locale; `sourceExcerpt` stays in original Portuguese
+- **Env var**: `OPENAI_API_KEY` must be set via `npx convex env set OPENAI_API_KEY sk-...`
+
 ### Implementation Status
-All MVP features are implemented (Phases 0-6 complete) + Convex backend migration + Feature A (archive):
+All MVP features are implemented (Phases 0-6 complete) + Convex backend migration + Feature A (archive) + Feature B (AI PUC processing):
 - Semester CRUD, Subject management, PUC upload/extraction
+- AI-powered PUC processing (PDF → events, brief, resources via GPT-4o-mini)
 - Calendar events (view/edit/confirm), month calendar view
 - Subject briefs (AI-generated, editable), Resources (CRUD, pin/sort)
 - Dashboard with aggregated data, .ics export, Settings, full EN/PT-PT i18n

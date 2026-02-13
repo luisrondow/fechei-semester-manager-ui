@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import {
 	assertNotArchived,
 	getSemesterIdForResource,
@@ -130,5 +130,53 @@ export const togglePin = mutation({
 			pinned: !r.pinned,
 			updatedAt: new Date().toISOString(),
 		});
+	},
+});
+
+export const createFromExtraction = internalMutation({
+	args: {
+		resources: v.array(
+			v.object({
+				subjectId: v.id("subjects"),
+				resourceType: v.string(),
+				title: v.string(),
+				authors: v.optional(v.string()),
+				url: v.optional(v.string()),
+				notes: v.optional(v.string()),
+				tags: v.array(v.string()),
+			}),
+		),
+	},
+	handler: async (ctx, args) => {
+		const now = new Date().toISOString();
+		for (const resource of args.resources) {
+			await ctx.db.insert("resources", {
+				subjectId: resource.subjectId,
+				sourceType: "puc_extracted",
+				resourceType: resource.resourceType,
+				title: resource.title,
+				authors: resource.authors,
+				url: resource.url,
+				notes: resource.notes,
+				tags: resource.tags,
+				pinned: false,
+				updatedAt: now,
+			});
+		}
+	},
+});
+
+export const deleteExtractedBySubject = internalMutation({
+	args: { subjectId: v.id("subjects") },
+	handler: async (ctx, args) => {
+		const resources = await ctx.db
+			.query("resources")
+			.withIndex("by_subject", (q) => q.eq("subjectId", args.subjectId))
+			.collect();
+		for (const r of resources) {
+			if (r.sourceType === "puc_extracted") {
+				await ctx.db.delete(r._id);
+			}
+		}
 	},
 });
