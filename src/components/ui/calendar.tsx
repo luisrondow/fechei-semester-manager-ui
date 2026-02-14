@@ -131,6 +131,7 @@ function Calendar({
 				...classNames,
 			}}
 			components={{
+				// biome-ignore lint/correctness/noNestedComponentDefinitions: Shadcn UI generated component
 				Root: ({ className, rootRef, ...props }) => {
 					return (
 						<div
@@ -141,6 +142,7 @@ function Calendar({
 						/>
 					);
 				},
+				// biome-ignore lint/correctness/noNestedComponentDefinitions: Shadcn UI generated component
 				Chevron: ({ className, orientation, ...props }) => {
 					if (orientation === "left") {
 						return (
@@ -162,6 +164,7 @@ function Calendar({
 					);
 				},
 				DayButton: CalendarDayButton,
+				// biome-ignore lint/correctness/noNestedComponentDefinitions: Shadcn UI generated component
 				WeekNumber: ({ children, ...props }) => {
 					return (
 						<td {...props}>

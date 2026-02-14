@@ -97,5 +97,5 @@ function SemestersPage() {
 				)}
 			</div>
 		</div>
-	)
+	);
 }

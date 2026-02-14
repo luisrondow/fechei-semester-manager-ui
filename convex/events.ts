@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { assertNotArchived, getSemesterIdForEvent } from "./helpers";
+import type { EventType, EventStatus } from "../src/lib/types";
 
 export const listBySemester = query({
 	args: { semesterId: v.string() },
@@ -24,12 +25,12 @@ export const listBySemester = query({
 		return allEvents.map((e) => ({
 			id: e._id,
 			subjectId: e.subjectId,
-			type: e.type,
+			type: e.type as EventType,
 			startDate: e.startDate,
 			endDate: e.endDate,
 			title: e.title,
 			description: e.description,
-			status: e.status,
+			status: e.status as EventStatus,
 			sourceExcerpt: e.sourceExcerpt ?? null,
 			createdAt: new Date(e._creationTime).toISOString(),
 			updatedAt: e.updatedAt,
@@ -49,12 +50,12 @@ export const listBySubject = query({
 		return events.map((e) => ({
 			id: e._id,
 			subjectId: e.subjectId,
-			type: e.type,
+			type: e.type as EventType,
 			startDate: e.startDate,
 			endDate: e.endDate,
 			title: e.title,
 			description: e.description,
-			status: e.status,
+			status: e.status as EventStatus,
 			sourceExcerpt: e.sourceExcerpt ?? null,
 			createdAt: new Date(e._creationTime).toISOString(),
 			updatedAt: e.updatedAt,
@@ -89,12 +90,12 @@ export const update = mutation({
 		return {
 			id: e!._id,
 			subjectId: e!.subjectId,
-			type: e!.type,
+			type: e!.type as EventType,
 			startDate: e!.startDate,
 			endDate: e!.endDate,
 			title: e!.title,
 			description: e!.description,
-			status: e!.status,
+			status: e!.status as EventStatus,
 			sourceExcerpt: e!.sourceExcerpt ?? null,
 			createdAt: new Date(e!._creationTime).toISOString(),
 			updatedAt: e!.updatedAt,

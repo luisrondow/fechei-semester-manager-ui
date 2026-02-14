@@ -5,6 +5,7 @@ import {
 	getSemesterIdForResource,
 	getSemesterIdForSubject,
 } from "./helpers";
+import type { ResourceSourceType, ResourceType } from "../src/lib/types";
 
 export const listBySubject = query({
 	args: { subjectId: v.string() },
@@ -18,8 +19,8 @@ export const listBySubject = query({
 		return resources.map((r) => ({
 			id: r._id,
 			subjectId: r.subjectId,
-			sourceType: r.sourceType,
-			resourceType: r.resourceType,
+			sourceType: r.sourceType as ResourceSourceType,
+			resourceType: r.resourceType as ResourceType,
 			title: r.title,
 			authors: r.authors ?? null,
 			url: r.url ?? null,
@@ -58,8 +59,8 @@ export const create = mutation({
 		return {
 			id: r!._id,
 			subjectId: r!.subjectId,
-			sourceType: r!.sourceType,
-			resourceType: r!.resourceType,
+			sourceType: r!.sourceType as ResourceSourceType,
+			resourceType: r!.resourceType as ResourceType,
 			title: r!.title,
 			authors: r!.authors ?? null,
 			url: r!.url ?? null,
@@ -96,8 +97,8 @@ export const update = mutation({
 		return {
 			id: r!._id,
 			subjectId: r!.subjectId,
-			sourceType: r!.sourceType,
-			resourceType: r!.resourceType,
+			sourceType: r!.sourceType as ResourceSourceType,
+			resourceType: r!.resourceType as ResourceType,
 			title: r!.title,
 			authors: r!.authors ?? null,
 			url: r!.url ?? null,
