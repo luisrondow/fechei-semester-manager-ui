@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
+import type { ResourceSourceType, ResourceType } from "../src/lib/types";
 
 export const aggregatedData = query({
 	args: { semesterId: v.string() },
@@ -23,8 +24,8 @@ export const aggregatedData = query({
 		const pinnedResources: Array<{
 			id: string;
 			subjectId: string;
-			sourceType: string;
-			resourceType: string;
+			sourceType: ResourceSourceType;
+			resourceType: ResourceType;
 			title: string;
 			authors: string | null;
 			url: string | null;
@@ -46,8 +47,8 @@ export const aggregatedData = query({
 					pinnedResources.push({
 						id: r._id,
 						subjectId: r.subjectId,
-						sourceType: r.sourceType,
-						resourceType: r.resourceType,
+						sourceType: r.sourceType as ResourceSourceType,
+						resourceType: r.resourceType as ResourceType,
 						title: r.title,
 						authors: r.authors ?? null,
 						url: r.url ?? null,
