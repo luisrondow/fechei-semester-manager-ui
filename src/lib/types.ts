@@ -1,6 +1,6 @@
 export type Locale = "en" | "pt";
 
-export type EventType = "study_block" | "assessment" | "tbd";
+export type EventType = "study_block" | "assessment" | "tbd" | "announcement";
 export type EventStatus = "pending" | "confirmed";
 export type ResourceSourceType = "puc_extracted" | "user_saved";
 export type ResourceType = "required" | "complementary" | "other";

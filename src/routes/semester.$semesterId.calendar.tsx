@@ -5,6 +5,7 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	HelpCircle,
+	Megaphone,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { EventList } from "@/components/event-list";
@@ -76,6 +77,11 @@ const typeConfig = {
 		bg: "bg-event-assessment",
 		text: "text-white",
 		icon: CalendarDays,
+	},
+	announcement: {
+		bg: "bg-event-announcement",
+		text: "text-white",
+		icon: Megaphone,
 	},
 	tbd: {
 		bg: "bg-event-tbd",
@@ -283,6 +289,7 @@ function CalendarPage() {
 					[
 						["study_block", t.event.studyBlock],
 						["assessment", t.event.assessment],
+						["announcement", t.event.announcement],
 						["tbd", t.event.tbd],
 					] as const
 				).map(([type, label]) => (

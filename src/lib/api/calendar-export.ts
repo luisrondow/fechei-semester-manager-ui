@@ -34,7 +34,9 @@ function buildVEvent(event: CalendarEvent, subjectName: string): string {
 			? "ASSESSMENT"
 			: event.type === "study_block"
 				? "STUDY"
-				: "TBD";
+				: event.type === "announcement"
+					? "ANNOUNCEMENT"
+					: "TBD";
 	lines.push(`CATEGORIES:${categories}`);
 	lines.push(
 		`STATUS:${event.status === "confirmed" ? "CONFIRMED" : "TENTATIVE"}`,
