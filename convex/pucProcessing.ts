@@ -12,9 +12,9 @@ const extractionSchema = z.object({
 	events: z.array(
 		z.object({
 			type: z
-				.enum(["study_block", "assessment", "tbd"])
+				.enum(["study_block", "assessment", "tbd", "announcement"])
 				.describe(
-					"study_block = study periods or activity windows, assessment = exams/quizzes/assignments with deadlines, tbd = mentioned but date unclear",
+					"study_block = study periods or activity windows, assessment = exams/quizzes/assignments with deadlines, announcement = a known date when the professor will publish a later date or grade, tbd = mentioned but date itself is still unclear",
 				),
 			startDate: z
 				.string()
@@ -99,27 +99,58 @@ Analyze the following extracted PDF text from a PUC document and extract structu
 **Output language**: Generate all titles, descriptions, and brief text in ${lang}.
 **EXCEPTION**: sourceExcerpt fields must remain in the original Portuguese as they reference the source document.
 
+**Portuguese PUC conventions** (common terms to recognize):
+- "Plano de atividades formativas" = study activity schedule with explicit dates
+- "e-fólio" / "p-fólio" = online / in-person assessment components
+- "Época normal" / "Época de recurso" = normal / resit exam period
+- "Bibliografia obrigatória" = required bibliography
+- "Bibliografia complementar" = complementary bibliography
+- "Competências" = competencies/skills
+- "Objetivos de aprendizagem" = learning objectives
+- "Metodologia" = methodology
+- "ECTS" = European Credit Transfer System (workload indicator)
+- "UC" = Unidade Curricular (course unit)
+
 **Extraction rules**:
 
 EVENTS:
-- Extract all dates that represent study blocks, assessment deadlines, exam dates, assignment due dates, activity periods
+- Extract all dates that represent study blocks, assessment deadlines, exam dates, assignment due dates, activity periods, or dates when the professor will publish a later date/grade
 - For date ranges (e.g. "study period from X to Y"), use the full range with startDate and endDate
 - For single dates (e.g. "exam on date X"), set both startDate and endDate to the same date
-- Classify as: "assessment" for exams, tests, assignments, quizzes; "study_block" for study periods, activity windows, module dates; "tbd" if a date is mentioned but unclear
+- Classify as: "assessment" for exams, tests, assignments, quizzes; "study_block" for study periods, activity windows, module dates; "announcement" when the PUC provides a concrete date when the professor will later announce/publish something (such as an exam date or a grade); "tbd" when the actual date is unresolved, external, or still unclear
 - All dates must fall within the semester period (${semesterStart} to ${semesterEnd}) or be reasonable academic dates
 - Include sourceExcerpt with the original Portuguese text that mentions this date
+- For assessment events, include the weight/percentage in the title if stated in the PUC (e.g., "e-Fólio A (20%)" or "Exame Final (60%)")
+- Include assessment modality in the description (online, in-person, open-book, timed, etc.) when mentioned
+- For announcement events, make the title explicit about what will be announced (e.g. "Grade published for e-Fólio A" or "Exam date announcement")
+
+**IMPORTANT — Inferring study blocks when no explicit dates are given**:
+If the PUC does NOT contain a "plano de atividades formativas" or other explicit study period schedule, but DOES list topics, modules, or thematic units, you MUST generate "study_block" events for each topic by distributing them evenly across the semester:
+1. Count the number of topics/modules/units listed
+2. Divide the semester duration equally: each topic gets (semester_duration_in_days / N) days
+3. Assign sequential non-overlapping date ranges starting from ${semesterStart}
+4. Title each block with the topic/module name (e.g., "Module 1: Introduction to X")
+5. Set description to the specific content or subtopics covered in that block
+6. Set sourceExcerpt to the original Portuguese text listing that topic/module
+This ensures students always have a study schedule even when the PUC omits explicit dates.
 
 BRIEF:
 - Generate a comprehensive subject brief in markdown format
-- Include sections: ## Overview, ## Learning Objectives, ## Competencies, ## Methodology, ## Assessment Structure, ## Study Roadmap
-- The study roadmap should be a timeline/schedule based on the extracted dates
-- Set confidenceScore based on how much information was available (1.0 = very detailed PUC, 0.3 = sparse information)
+- Include sections: ## Overview, ## Learning Objectives, ## Competencies, ## Methodology, ## Assessment Structure, ## Workload, ## Study Roadmap
+- In **Assessment Structure**, list each component with its weight percentage, modality (online/in-person), and any specific requirements
+- In **Workload**, include ECTS credits and estimated weekly study hours if mentioned in the PUC
+- The **Study Roadmap** should be a chronological timeline matching the extracted events, giving students a clear module-by-module progression
+- Set confidenceScore: 0.8–1.0 if PUC is detailed with clear dates and structure; 0.5–0.7 if some information is ambiguous or missing; 0.3–0.5 if very sparse
 
 RESOURCES:
 - Extract all bibliography entries, references, and recommended readings
-- Classify as: "required" for mandatory/main bibliography, "complementary" for supplementary reading, "other" for any other references
-- Parse author names, titles, URLs when available
-- Add relevant tags
+- Classify as: "required" for mandatory/main bibliography ("Bibliografia obrigatória"), "complementary" for supplementary reading ("Bibliografia complementar"), "other" for any other references or web resources
+- Parse author names in the format they appear (typically "Lastname, Firstname")
+- For books, include publisher and year in the notes field if available
+- For articles/chapters, include journal/book name and pages in the notes field
+- If ISBN or DOI is present, include it in the notes field
+- Add relevant tags: "textbook", "article", "online", "chapter X-Y", "video", etc.
+- If the PUC mentions specific chapters or page ranges to read, include those in the tags
 
 Here is the extracted PDF text:
 
@@ -202,7 +233,7 @@ export const processPuc = action({
 			);
 
 			const { output: result } = await generateText({
-				model: openai("gpt-4o-mini"),
+				model: openai("gpt-5-mini"),
 				prompt,
 				output: Output.object({ schema: extractionSchema }),
 			});

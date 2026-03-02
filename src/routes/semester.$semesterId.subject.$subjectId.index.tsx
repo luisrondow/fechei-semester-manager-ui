@@ -4,6 +4,8 @@ import {
 	CalendarDays,
 	FileText,
 	GraduationCap,
+	HelpCircle,
+	Megaphone,
 	RefreshCw,
 	Trash2,
 	Upload,
@@ -350,16 +352,25 @@ function SubjectOverviewPage() {
 									bg: "bg-event-study/10",
 									text: "text-event-study",
 									label: t.event.studyBlock,
+									icon: BookOpen,
 								},
 								assessment: {
 									bg: "bg-event-assessment/10",
 									text: "text-event-assessment",
 									label: t.event.assessment,
+									icon: CalendarDays,
+								},
+								announcement: {
+									bg: "bg-event-announcement/10",
+									text: "text-event-announcement",
+									label: t.event.announcement,
+									icon: Megaphone,
 								},
 								tbd: {
 									bg: "bg-event-tbd/10",
 									text: "text-event-tbd",
 									label: t.event.tbd,
+									icon: HelpCircle,
 								},
 							};
 							const cfg = typeConfig[event.type as keyof typeof typeConfig];
@@ -372,7 +383,7 @@ function SubjectOverviewPage() {
 									<div
 										className={`w-8 h-8 rounded-lg ${cfg.bg} flex items-center justify-center shrink-0`}
 									>
-										<CalendarDays className={`w-4 h-4 ${cfg.text}`} />
+										<cfg.icon className={`w-4 h-4 ${cfg.text}`} />
 									</div>
 									<div className="min-w-0 flex-1">
 										<p className="text-sm font-medium truncate">

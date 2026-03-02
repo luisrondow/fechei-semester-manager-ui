@@ -19,6 +19,14 @@ export function useUpdateEvent(_subjectId: string, _semesterId?: string) {
 	return useConvexMutation(api.events.update);
 }
 
+export function useCreateEvent(_subjectId: string, _semesterId?: string) {
+	return useConvexMutation(api.events.create);
+}
+
 export function useConfirmEvent(_subjectId: string, _semesterId?: string) {
 	return useConvexMutation(api.events.confirm);
+}
+
+export function useDeleteEvent(_subjectId: string, _semesterId?: string) {
+	return useConvexMutation(api.events.remove);
 }

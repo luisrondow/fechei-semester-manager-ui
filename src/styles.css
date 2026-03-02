@@ -66,6 +66,7 @@ code {
 
   --event-study: oklch(0.55 0.12 250);
   --event-assessment: oklch(0.55 0.18 30);
+  --event-announcement: oklch(0.62 0.13 190);
   --event-tbd: oklch(0.60 0.10 85);
 }
 
@@ -146,6 +147,7 @@ code {
   --color-info: var(--info);
   --color-event-study: var(--event-study);
   --color-event-assessment: var(--event-assessment);
+  --color-event-announcement: var(--event-announcement);
   --color-event-tbd: var(--event-tbd);
 }
 

@@ -1,4 +1,4 @@
-import { BookOpen, CalendarDays, HelpCircle } from "lucide-react";
+import { BookOpen, CalendarDays, HelpCircle, Megaphone } from "lucide-react";
 import { StatusChip } from "@/components/status-chip";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n";
@@ -14,6 +14,11 @@ const typeConfig = {
 		bg: "bg-event-assessment/10",
 		text: "text-event-assessment",
 		icon: CalendarDays,
+	},
+	announcement: {
+		bg: "bg-event-announcement/10",
+		text: "text-event-announcement",
+		icon: Megaphone,
 	},
 	tbd: {
 		bg: "bg-event-tbd/10",
@@ -34,6 +39,7 @@ export function EventCard({ event, subjectName, compact }: EventCardProps) {
 	const typeLabels = {
 		study_block: t.event.studyBlock,
 		assessment: t.event.assessment,
+		announcement: t.event.announcement,
 		tbd: t.event.tbd,
 	};
 
